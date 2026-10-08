@@ -69,7 +69,10 @@
             </div>
             <div>
                 <h4 class="fw-bold mb-1" th:text="'Chào mừng ' + ${fullName} + '!'">Chào mừng bạn!</h4>
-                <p class="text-muted mb-0 small">Hệ thống Quản lý Đề tài Sinh viên - Khoa Công nghệ Thông tin HCMUTE</p>
+                <p class="text-muted mb-0 small">
+                    <span class="badge bg-secondary me-2" th:text="${departmentName}">Bộ môn</span>
+                    Hệ thống Quản lý Đề tài Sinh viên - Khoa CNTT HCMUTE
+                </p>
             </div>
         </div>
     </div>
