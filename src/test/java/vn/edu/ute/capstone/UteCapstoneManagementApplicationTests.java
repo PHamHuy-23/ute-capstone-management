@@ -8,7 +8,10 @@ class UteCapstoneManagementApplicationTests {
 
     @Test
     void contextLoads() {
-        // Kiểm tra xem ứng dụng Spring Boot có nạp cấu hình thành công không
+        org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+        String hash = encoder.encode("123456");
+        System.out.println("=== BCRYPT HASH OF 123456: " + hash + " ===");
+        System.out.println("=== MATCHES: " + encoder.matches("123456", hash) + " ===");
     }
 
 }
