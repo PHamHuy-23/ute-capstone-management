@@ -20,6 +20,10 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     boolean existsByCodeAndIdNot(String code, Long id);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT t FROM Topic t WHERE t.id = :id")
+    java.util.Optional<Topic> findByIdForUpdate(@Param("id") Long id);
+
     List<Topic> findByPeriodId(Long periodId);
 
     List<Topic> findByDepartmentId(Long departmentId);

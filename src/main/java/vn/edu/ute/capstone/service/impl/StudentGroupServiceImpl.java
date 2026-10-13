@@ -68,7 +68,9 @@ public class StudentGroupServiceImpl implements StudentGroupService {
     @Override
     @Transactional
     public StudentGroup addMember(Long groupId, String studentUsername, User currentLeader) {
-        StudentGroup group = findById(groupId);
+        // Khóa nhóm bằng Pessimistic Lock để chống race condition thêm vượt quá 3 thành viên
+        StudentGroup group = groupRepository.findByIdForUpdate(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhóm sinh viên với ID: " + groupId));
 
         // Guard 1: Chỉ nhóm trưởng mới được thêm thành viên
         validateLeaderAuthorization(group, currentLeader);
@@ -177,7 +179,8 @@ public class StudentGroupServiceImpl implements StudentGroupService {
         }
 
         // Guard 4: Đề tài có tồn tại không?
-        Topic topic = topicRepository.findById(topicId)
+        // Sử dụng Khóa bi quan (Pessimistic Lock) để chống xung đột race condition khi nhiều nhóm cùng đăng ký
+        Topic topic = topicRepository.findByIdForUpdate(topicId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đề tài tương ứng."));
 
         // Guard 5: Đề tài có thuộc cùng đợt với nhóm không?

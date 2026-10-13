@@ -79,7 +79,7 @@
                     </div>
 
                     <!-- Chặn 1: Đợt đã đóng hoặc ở trạng thái không cho phép nộp -->
-                    <div th:if="${selectedPeriod != null and (selectedPeriod.status.name() == 'CLOSED' or selectedPeriod.status.name() == 'OPEN_LECTURER')}" 
+                    <div th:if="${selectedPeriod != null and (selectedPeriod.status.name() == 'COMPLETED' or selectedPeriod.status.name() == 'OPEN_LECTURER')}" 
                          class="nb-alert nb-alert-danger mb-0">
                         <i class="bi bi-lock-fill me-1"></i>
                         Đợt đăng ký hiện đang ở trạng thái <strong><span th:text="${selectedPeriod.status.displayName}">Đóng</span></strong>. 
@@ -87,14 +87,14 @@
                     </div>
 
                     <!-- Chặn 2: Không phải nhóm trưởng -->
-                    <div th:if="${selectedPeriod != null and selectedPeriod.status.name() != 'CLOSED' and selectedPeriod.status.name() != 'OPEN_LECTURER' and !isLeader}" 
+                    <div th:if="${selectedPeriod != null and selectedPeriod.status.name() != 'COMPLETED' and selectedPeriod.status.name() != 'OPEN_LECTURER' and !isLeader}" 
                          class="nb-alert nb-alert-warning mb-0">
                         <i class="bi bi-info-circle-fill me-1"></i>
                         Bạn là thành viên trong nhóm. Theo quy định, chỉ duy nhất <strong>Nhóm trưởng</strong> mới có quyền tải lên file báo cáo.
                     </div>
 
                     <!-- Form nộp: Chỉ cho phép khi là Leader và đợt còn mở/đang thực hiện -->
-                    <form th:if="${selectedPeriod != null and selectedPeriod.status.name() != 'CLOSED' and selectedPeriod.status.name() != 'OPEN_LECTURER' and isLeader}" 
+                    <form th:if="${selectedPeriod != null and selectedPeriod.status.name() != 'COMPLETED' and selectedPeriod.status.name() != 'OPEN_LECTURER' and isLeader}" 
                           th:action="@{/student/submissions/upload}" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="groupId" th:value="${group.id}">
 

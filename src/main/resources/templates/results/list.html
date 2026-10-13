@@ -25,7 +25,7 @@
             <a th:href="@{/admin/publish/export-excel(periodId=${selectedPeriodId})}" 
                class="nb-btn nb-btn-sm nb-btn-black" 
                title="Tải về file Excel bảng điểm tổng kết"
-               sec:authorize="hasAnyRole('ADMIN', 'HEAD_OF_DEPARTMENT')">
+               sec:authorize="hasAnyRole('ADMIN', 'DEPARTMENT_HEAD')">
                 <i class="bi bi-file-earmark-spreadsheet me-1"></i>XUẤT BẢNG ĐIỂM EXCEL
             </a>
         </div>

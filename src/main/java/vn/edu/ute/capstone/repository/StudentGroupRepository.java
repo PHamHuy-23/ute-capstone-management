@@ -16,4 +16,7 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Long
 
     List<StudentGroup> findByPeriodId(Long periodId);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("SELECT g FROM StudentGroup g WHERE g.id = :id")
+    Optional<StudentGroup> findByIdForUpdate(@org.springframework.data.repository.query.Param("id") Long id);
 }

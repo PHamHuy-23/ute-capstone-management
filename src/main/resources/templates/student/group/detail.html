@@ -72,7 +72,7 @@
             </div>
 
             <!-- Bước 3: Nộp báo cáo -->
-            <div class="nb-step" th:classappend="${selectedPeriod != null and (selectedPeriod.status.name() == 'REVIEWING' or selectedPeriod.status.name() == 'DEFENSE' or selectedPeriod.status.name() == 'CLOSED') ? 'completed' : (group != null and group.topic != null ? 'active' : '')}">
+            <div class="nb-step" th:classappend="${selectedPeriod != null and (selectedPeriod.status.name() == 'REVIEWING' or selectedPeriod.status.name() == 'DEFENSE' or selectedPeriod.status.name() == 'COMPLETED') ? 'completed' : (group != null and group.topic != null ? 'active' : '')}">
                 <div class="nb-step-circle">
                     <span>3</span>
                 </div>
@@ -81,7 +81,7 @@
             </div>
 
             <!-- Bước 4: Bảo vệ & Điểm -->
-            <div class="nb-step" th:classappend="${selectedPeriod != null and (selectedPeriod.status.name() == 'DEFENSE' or selectedPeriod.status.name() == 'CLOSED') ? 'active' : ''}">
+            <div class="nb-step" th:classappend="${selectedPeriod != null and (selectedPeriod.status.name() == 'DEFENSE' or selectedPeriod.status.name() == 'COMPLETED') ? 'active' : ''}">
                 <div class="nb-step-circle">
                     <span>4</span>
                 </div>

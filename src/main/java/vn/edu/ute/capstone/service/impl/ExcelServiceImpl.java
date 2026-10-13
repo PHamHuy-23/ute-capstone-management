@@ -452,17 +452,17 @@ public class ExcelServiceImpl implements ExcelService {
 
                 // 2. Mã đề tài
                 Cell c1 = row.createCell(1);
-                c1.setCellValue(t.getCode() != null ? t.getCode() : "");
+                c1.setCellValue(sanitizeCell(t.getCode()));
                 c1.setCellStyle(centerCellStyle);
 
                 // 3. Tên đề tài
                 Cell c2 = row.createCell(2);
-                c2.setCellValue(t.getTitle() != null ? t.getTitle() : "");
+                c2.setCellValue(sanitizeCell(t.getTitle()));
                 c2.setCellStyle(dataCellStyle);
 
                 // 4. Bộ môn
                 Cell c3 = row.createCell(3);
-                c3.setCellValue(t.getDepartment() != null ? t.getDepartment().getName() : "");
+                c3.setCellValue(sanitizeCell(t.getDepartment() != null ? t.getDepartment().getName() : ""));
                 c3.setCellStyle(dataCellStyle);
 
                 // 5. Mã nhóm & Danh sách sinh viên
@@ -573,6 +573,15 @@ public class ExcelServiceImpl implements ExcelService {
             log.error("Lỗi khi xuất bảng điểm ra Excel: ", e);
             throw new RuntimeException("Không thể tạo file Excel báo cáo: " + e.getMessage());
         }
+    }
+
+    private String sanitizeCell(String val) {
+        if (val == null) return "";
+        String trimmed = val.trim();
+        if (trimmed.startsWith("=") || trimmed.startsWith("+") || trimmed.startsWith("-") || trimmed.startsWith("@")) {
+            return "'" + trimmed;
+        }
+        return trimmed;
     }
 
 }

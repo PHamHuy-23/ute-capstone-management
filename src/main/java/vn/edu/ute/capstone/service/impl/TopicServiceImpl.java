@@ -184,6 +184,12 @@ public class TopicServiceImpl implements TopicService {
             if (approver.getDepartment() == null || !approver.getDepartment().getId().equals(topic.getDepartment().getId())) {
                 throw new IllegalStateException("Bạn chỉ có thẩm quyền xét duyệt các đề tài thuộc bộ môn của bạn.");
             }
+            // Quy chế liêm chính / Phân tách trách nhiệm: Không được tự duyệt đề tài do chính mình hướng dẫn
+            boolean isOwnTopic = topic.getAdvisors().stream()
+                    .anyMatch(adv -> adv.getLecturer().getId().equals(approver.getId()));
+            if (isOwnTopic) {
+                throw new IllegalStateException("Quy chế liêm chính: Bạn là Giảng viên hướng dẫn của đề tài này nên không thể tự phê duyệt đề tài của chính mình. Vui lòng để Trưởng khoa hoặc Phó bộ môn phê duyệt.");
+            }
         }
 
         // Guard 3: Nếu từ chối, bắt buộc phải có lý do

@@ -213,11 +213,19 @@ public class SubmissionServiceImpl implements SubmissionService {
         throw new IllegalStateException("Bạn không có quyền xem hoặc tải file báo cáo của nhóm này.");
     }
 
+    private static final java.util.Set<String> ALLOWED_EXTENSIONS = java.util.Set.of(
+            ".pdf", ".docx", ".doc", ".zip", ".rar", ".xlsx", ".xls", ".pptx", ".ppt"
+    );
+
     private String saveFile(MultipartFile file, String groupCode) {
         String originalName = file.getOriginalFilename();
         String extension = "";
         if (originalName != null && originalName.contains(".")) {
-            extension = originalName.substring(originalName.lastIndexOf("."));
+            extension = originalName.substring(originalName.lastIndexOf(".")).toLowerCase();
+        }
+
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new IllegalArgumentException("Định dạng file không hợp lệ! Hệ thống chỉ chấp nhận các định dạng học thuật an toàn (.pdf, .docx, .doc, .zip, .rar, .xlsx, .pptx).");
         }
 
         // Tên file độc nhất: GROUPCODE_UUID.ext

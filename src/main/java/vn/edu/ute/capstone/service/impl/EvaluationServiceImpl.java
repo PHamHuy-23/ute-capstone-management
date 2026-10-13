@@ -119,9 +119,82 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     @Transactional
     public Council updateCouncil(Long councilId, CouncilCreateDTO dto, User admin) {
-        deleteCouncil(councilId, admin);
-        dto.setId(null);
-        return createCouncil(dto, admin);
+        Council council = findCouncilById(councilId);
+        
+        // Kiểm tra cơ cấu số lượng giảng viên: Bắt buộc từ 3 đến 5 người
+        Set<Long> uniqueLecturerIds = new HashSet<>();
+        if (dto.getChairmanId() != null) uniqueLecturerIds.add(dto.getChairmanId());
+        if (dto.getSecretaryId() != null) uniqueLecturerIds.add(dto.getSecretaryId());
+        if (dto.getMemberIds() != null) uniqueLecturerIds.addAll(dto.getMemberIds());
+
+        if (uniqueLecturerIds.size() < 3 || uniqueLecturerIds.size() > 5) {
+            throw new IllegalArgumentException("Hội đồng phản biện phải có tổng cộng từ 3 đến 5 Giảng viên tham gia (bao gồm Chủ tịch, Thư ký và Ủy viên).");
+        }
+
+        if (dto.getChairmanId().equals(dto.getSecretaryId())) {
+            throw new IllegalArgumentException("Chủ tịch hội đồng và Thư ký hội đồng không được là cùng một người.");
+        }
+
+        RegistrationPeriod period = registrationPeriodRepository.findById(dto.getPeriodId())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đợt đăng ký."));
+
+        council.setName(dto.getName());
+        council.setDefenseDate(dto.getDefenseDate());
+        council.setLocation(dto.getLocation());
+        council.setPeriod(period);
+
+        // Kiểm tra xung đột lợi ích đối với các đề tài phân công
+        if (dto.getTopicIds() != null && !dto.getTopicIds().isEmpty()) {
+            List<Topic> topics = topicRepository.findAllById(dto.getTopicIds());
+            for (Topic t : topics) {
+                for (TopicAdvisor adv : t.getAdvisors()) {
+                    if (uniqueLecturerIds.contains(adv.getLecturer().getId())) {
+                        throw new IllegalStateException("Xung đột quyền lợi: Giảng viên '" + adv.getLecturer().getFullName() 
+                                + "' là GVHD của đề tài '" + t.getCode() + "', không được phép tham gia hội đồng chấm đề tài này!");
+                    }
+                }
+            }
+            council.setAssignedTopics(new HashSet<>(topics));
+        } else {
+            council.setAssignedTopics(new HashSet<>());
+        }
+
+        // Xóa thành viên cũ và thêm danh sách thành viên mới (cập nhật in-place)
+        councilMemberRepository.deleteAll(council.getMembers());
+        council.getMembers().clear();
+
+        List<CouncilMember> members = new ArrayList<>();
+        User chairman = userRepository.findById(dto.getChairmanId()).orElseThrow();
+        members.add(CouncilMember.builder()
+                .id(new CouncilMemberId(council.getId(), chairman.getId()))
+                .council(council)
+                .lecturer(chairman)
+                .roleInCouncil(CouncilRole.CHAIRMAN)
+                .build());
+
+        User secretary = userRepository.findById(dto.getSecretaryId()).orElseThrow();
+        members.add(CouncilMember.builder()
+                .id(new CouncilMemberId(council.getId(), secretary.getId()))
+                .council(council)
+                .lecturer(secretary)
+                .roleInCouncil(CouncilRole.SECRETARY)
+                .build());
+
+        if (dto.getMemberIds() != null) {
+            for (Long memId : dto.getMemberIds()) {
+                if (!memId.equals(dto.getChairmanId()) && !memId.equals(dto.getSecretaryId())) {
+                    User member = userRepository.findById(memId).orElseThrow();
+                    members.add(CouncilMember.builder()
+                            .id(new CouncilMemberId(council.getId(), member.getId()))
+                            .council(council)
+                            .lecturer(member)
+                            .roleInCouncil(CouncilRole.MEMBER)
+                            .build());
+                }
+            }
+        }
+        council.setMembers(members);
+        return councilRepository.save(council);
     }
 
     @Override
@@ -172,6 +245,13 @@ public class EvaluationServiceImpl implements EvaluationService {
             boolean isMemberOfCouncil = councilMemberRepository.existsByCouncilIdAndLecturerId(council.getId(), evaluator.getId());
             if (!isMemberOfCouncil) {
                 throw new IllegalStateException("Bạn không phải là thành viên trong hội đồng này.");
+            }
+
+            // Guard 4: Đề tài phải được phân công cho Hội đồng này chấm
+            boolean isAssignedToCouncil = council.getAssignedTopics().stream()
+                    .anyMatch(t -> t.getId().equals(topic.getId()));
+            if (!isAssignedToCouncil) {
+                throw new IllegalStateException("Đề tài này không nằm trong danh sách đề tài được phân công cho hội đồng.");
             }
         }
 
