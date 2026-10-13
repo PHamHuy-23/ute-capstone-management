@@ -72,21 +72,23 @@
             </div>
 
             <!-- Bước 3: Nộp báo cáo -->
-            <div class="nb-step" th:classappend="${selectedPeriod != null and (selectedPeriod.status.name() == 'REVIEWING' or selectedPeriod.status.name() == 'DEFENSE' or selectedPeriod.status.name() == 'COMPLETED') ? 'completed' : (group != null and group.topic != null ? 'active' : '')}">
+            <div class="nb-step" th:classappend="${hasSubmission ? 'completed' : (group != null and group.topic != null ? 'active' : '')}">
                 <div class="nb-step-circle">
-                    <span>3</span>
+                    <i th:if="${hasSubmission}" class="bi bi-check-lg"></i>
+                    <span th:unless="${hasSubmission}">3</span>
                 </div>
                 <div class="nb-step-label">Nộp Báo Cáo</div>
-                <div class="nb-step-desc">Tiến độ & Luận văn</div>
+                <div class="nb-step-desc" th:text="${hasSubmission ? 'Đã nộp báo cáo' : (group != null and group.topic != null ? 'Chờ nộp báo cáo' : 'Chưa đến hạn')}">Tiến độ & Luận văn</div>
             </div>
 
             <!-- Bước 4: Bảo vệ & Điểm -->
-            <div class="nb-step" th:classappend="${selectedPeriod != null and (selectedPeriod.status.name() == 'DEFENSE' or selectedPeriod.status.name() == 'COMPLETED') ? 'active' : ''}">
+            <div class="nb-step" th:classappend="${hasEvaluation ? 'completed' : (hasSubmission ? 'active' : '')}">
                 <div class="nb-step-circle">
-                    <span>4</span>
+                    <i th:if="${hasEvaluation}" class="bi bi-check-lg"></i>
+                    <span th:unless="${hasEvaluation}">4</span>
                 </div>
                 <div class="nb-step-label">Bảo Vệ & Điểm</div>
-                <div class="nb-step-desc">Hội đồng chấm thi</div>
+                <div class="nb-step-desc" th:text="${hasEvaluation ? ('Điểm TB: ' + #numbers.formatDecimal(averageScore, 1, 2)) : (hasSubmission ? 'Đang chấm điểm' : 'Chưa có điểm')}">Hội đồng chấm thi</div>
             </div>
         </div>
     </div>

@@ -31,6 +31,8 @@ public class StudentGroupController {
     private final UserService userService;
     private final RegistrationPeriodRepository periodRepository;
     private final vn.edu.ute.capstone.service.TopicService topicService;
+    private final vn.edu.ute.capstone.repository.SubmissionRepository submissionRepository;
+    private final vn.edu.ute.capstone.service.EvaluationService evaluationService;
 
     @GetMapping("/group")
     public String viewMyGroup(
@@ -61,9 +63,22 @@ public class StudentGroupController {
         }
 
         boolean isLeader = false;
+        boolean hasSubmission = false;
+        boolean hasEvaluation = false;
+        Double averageScore = null;
+
         if (groupOpt.isPresent()) {
-            isLeader = groupOpt.get().getMembers().stream()
+            StudentGroup g = groupOpt.get();
+            isLeader = g.getMembers().stream()
                     .anyMatch(m -> m.getStudent().getId().equals(student.getId()) && Boolean.TRUE.equals(m.getIsLeader()));
+
+            long subCount = submissionRepository.countByGroupId(g.getId());
+            hasSubmission = subCount > 0;
+
+            if (g.getTopic() != null) {
+                averageScore = evaluationService.getAverageScore(g.getTopic().getId());
+                hasEvaluation = averageScore != null;
+            }
         }
 
         RegistrationPeriod selectedPeriod = null;
@@ -74,6 +89,9 @@ public class StudentGroupController {
         model.addAttribute("student", student);
         model.addAttribute("group", groupOpt.orElse(null));
         model.addAttribute("isLeader", isLeader);
+        model.addAttribute("hasSubmission", hasSubmission);
+        model.addAttribute("hasEvaluation", hasEvaluation);
+        model.addAttribute("averageScore", averageScore);
         model.addAttribute("selectedPeriodId", currentPeriodId);
         model.addAttribute("selectedPeriod", selectedPeriod);
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());

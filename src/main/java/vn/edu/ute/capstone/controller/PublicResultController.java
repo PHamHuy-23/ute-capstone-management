@@ -48,15 +48,33 @@ public class PublicResultController {
                 .body(new InputStreamResource(in));
     }
 
+    private final vn.edu.ute.capstone.service.UserService userService;
+
     @GetMapping({"/admin/publish", "/student/results"})
     public String viewResults(
             @RequestParam(name = "periodId", required = false) Long periodId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
             jakarta.servlet.http.HttpServletRequest request,
             Model model
     ) {
-        List<Topic> topics = (periodId != null && periodId > 0)
-                ? topicRepository.findByPeriodId(periodId)
-                : topicRepository.findAll();
+        String currentUrl = request.getRequestURI();
+        boolean isStudent = request.isUserInRole("ROLE_STUDENT");
+
+        List<Topic> topics;
+        if (isStudent && userDetails != null) {
+            vn.edu.ute.capstone.entity.User student = userService.findByUsername(userDetails.getUsername());
+            List<vn.edu.ute.capstone.entity.StudentGroup> myGroups = groupRepository.findByStudentId(student.getId());
+            topics = myGroups.stream()
+                    .map(vn.edu.ute.capstone.entity.StudentGroup::getTopic)
+                    .filter(java.util.Objects::nonNull)
+                    .filter(t -> (periodId == null || periodId <= 0 || t.getPeriod().getId().equals(periodId)))
+                    .distinct()
+                    .toList();
+        } else {
+            topics = (periodId != null && periodId > 0)
+                    ? topicRepository.findByPeriodId(periodId)
+                    : topicRepository.findAll();
+        }
 
         Map<Long, Double> averageScores = new HashMap<>();
         Map<Long, List<vn.edu.ute.capstone.entity.Evaluation>> topicEvaluations = new HashMap<>();
@@ -67,13 +85,13 @@ public class PublicResultController {
             topicEvaluations.put(t.getId(), evaluationService.getEvaluationsByTopic(t.getId(), null));
         }
 
-        String currentUrl = request.getRequestURI();
         model.addAttribute("topics", topics);
         model.addAttribute("averageScores", averageScores);
         model.addAttribute("topicEvaluations", topicEvaluations);
         model.addAttribute("selectedPeriodId", periodId);
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());
         model.addAttribute("currentUrl", currentUrl);
+        model.addAttribute("isStudent", isStudent);
 
         return "results/list";
     }
