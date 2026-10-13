@@ -1,0 +1,412 @@
+/* ==========================================================================
+   HCMUTE CAPSTONE - NEO-BRUTALISM DESIGN SYSTEM (CORE TOKENS & UTILITIES)
+   ========================================================================== */
+
+/* 1. DESIGN TOKENS (Biến dùng chung) */
+:root {
+    /* Palette: Tuyệt đối Đen & Trắng */
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-hover: #f5f5f5;
+    --color-text: #000000;
+    --color-text-muted: #555555;
+    --color-text-inverted: #ffffff;
+    --color-border: #000000;
+
+    /* Borders */
+    --border-width-sm: 1.5px;
+    --border-width: 2px;
+    --border-width-lg: 3px;
+    --border-solid: var(--border-width) solid var(--color-border);
+    --border-solid-thick: var(--border-width-lg) solid var(--color-border);
+    --border-solid-sm: var(--border-width-sm) solid var(--color-border);
+    --radius-none: 0px;
+
+    /* Hard Shadows: Chỉ dùng cho khối nền TRẮNG */
+    --shadow-sm: 2px 2px 0px var(--color-border);
+    --shadow-md: 4px 4px 0px var(--color-border);
+    --shadow-lg: 6px 6px 0px var(--color-border);
+    --shadow-pressed: 1px 1px 0px var(--color-border);
+
+    /* Click-down translation */
+    --press-offset: translate(3px, 3px);
+    --press-offset-sm: translate(1.5px, 1.5px);
+}
+
+/* 2. BASE RESET */
+body {
+    background-color: var(--color-bg) !important;
+    color: var(--color-text) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 3. NAVIGATION (nb-navbar) */
+.nb-navbar {
+    background-color: var(--color-surface);
+    border-bottom: var(--border-solid-thick);
+    padding: 12px 0;
+}
+
+.nb-navbar .navbar-brand {
+    color: var(--color-text) !important;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    font-size: 1.25rem;
+}
+
+/* 4. CARDS & PANELS (nb-card) */
+.nb-card {
+    background-color: var(--color-surface);
+    border: var(--border-solid);
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-none) !important;
+    padding: 24px;
+    margin-bottom: 24px;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.nb-card-flat {
+    box-shadow: none !important;
+}
+
+/* 5. BUTTON SYSTEM (nb-btn) */
+/* Nút cơ sở */
+.nb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-none) !important;
+    font-weight: 700;
+    font-size: 0.925rem;
+    padding: 8px 18px;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1.4;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease;
+}
+
+/* Style A: Nút trắng (Default Primary) -> Đổ bóng đen cứng, click sập xuống */
+.nb-btn,
+.nb-btn-white {
+    background-color: var(--color-surface);
+    color: var(--color-text) !important;
+    border: var(--border-solid);
+    box-shadow: var(--shadow-md);
+}
+
+.nb-btn:hover,
+.nb-btn-white:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text) !important;
+}
+
+.nb-btn:active,
+.nb-btn-white:active {
+    transform: var(--press-offset);
+    box-shadow: var(--shadow-pressed);
+}
+
+/* Style B: Nút đen (Inverted) -> Không có shadow đen, click lún nhẹ dứt khoát */
+.nb-btn-black {
+    background-color: var(--color-text) !important;
+    color: var(--color-text-inverted) !important;
+    border: var(--border-solid) !important;
+    box-shadow: none !important;
+}
+
+.nb-btn-black:hover {
+    background-color: #222222 !important;
+    color: var(--color-text-inverted) !important;
+}
+
+.nb-btn-black:active {
+    transform: translate(2px, 2px);
+    background-color: #000000 !important;
+    box-shadow: none !important;
+}
+
+/* Style C: Nút viền ngoài (Outline) */
+.nb-btn-outline {
+    background-color: transparent;
+    color: var(--color-text) !important;
+    border: var(--border-solid);
+    box-shadow: none;
+}
+
+.nb-btn-outline:hover {
+    background-color: var(--color-surface-hover);
+}
+
+.nb-btn-outline:active {
+    transform: translate(1px, 1px);
+}
+
+/* Button Sizes */
+.nb-btn-sm {
+    padding: 4px 10px;
+    font-size: 0.825rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.nb-btn-sm:active {
+    transform: var(--press-offset-sm);
+    box-shadow: var(--shadow-pressed);
+}
+
+.nb-btn-black.nb-btn-sm {
+    box-shadow: none !important;
+}
+
+.nb-btn-black.nb-btn-sm:active {
+    transform: var(--press-offset-sm);
+    box-shadow: none !important;
+}
+
+.nb-btn-lg {
+    padding: 12px 24px;
+    font-size: 1.05rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.nb-btn-lg:active {
+    transform: var(--press-offset);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 6. FORMS & INPUTS */
+.form-control,
+.form-select {
+    background-color: var(--color-surface) !important;
+    color: var(--color-text) !important;
+    border: var(--border-solid) !important;
+    border-radius: var(--radius-none) !important;
+    box-shadow: none !important;
+    padding: 10px 14px;
+    font-weight: 500;
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none !important;
+    box-shadow: var(--shadow-sm) !important;
+    border-color: var(--color-border) !important;
+}
+
+.input-group-text {
+    background-color: var(--color-surface) !important;
+    color: var(--color-text) !important;
+    border: var(--border-solid) !important;
+    border-radius: var(--radius-none) !important;
+    border-right: none !important;
+}
+
+.form-check-input {
+    border-radius: var(--radius-none) !important;
+    border: var(--border-solid) !important;
+    box-shadow: none !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+}
+
+/* 7. TABLE (nb-table) - Chuẩn bảng trắng đen sắc nét */
+.nb-table-container {
+    border: var(--border-solid-thick);
+    box-shadow: var(--shadow-md);
+    background-color: var(--color-surface);
+    overflow-x: auto;
+    margin-bottom: 24px;
+}
+
+.nb-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-surface);
+    margin-bottom: 0;
+}
+
+.nb-table th {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.825rem;
+    letter-spacing: 0.5px;
+    border: var(--border-solid-sm);
+    border-bottom: var(--border-solid-thick);
+    padding: 14px 16px;
+}
+
+.nb-table td {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: var(--border-solid-sm);
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+.nb-table tbody tr:hover td {
+    background-color: var(--color-surface-hover);
+}
+
+/* 8. BADGES (nb-badge) - Không shadow gây bẩn */
+.nb-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: var(--border-solid-sm);
+    border-radius: var(--radius-none);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: none !important;
+}
+
+.nb-badge-black {
+    background-color: var(--color-text) !important;
+    color: var(--color-text-inverted) !important;
+    border: var(--border-solid-sm) !important;
+    box-shadow: none !important;
+}
+
+/* 9. ALERTS (nb-alert) */
+.nb-alert {
+    border: var(--border-solid);
+    border-radius: var(--radius-none);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 18px;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.nb-alert-danger {
+    border-left: 8px solid var(--color-border);
+}
+
+.nb-alert-success {
+    border-left: 8px solid var(--color-border);
+}
+
+/* 10. TYPOGRAPHY & UTILITIES */
+.nb-title {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+}
+
+.nb-divider {
+    border-bottom: var(--border-solid);
+    margin: 18px 0;
+}
+
+.nb-divider-thick {
+    border-bottom: var(--border-solid-thick);
+    margin: 20px 0;
+}
+
+/* 11. CAPSTONE TIMELINE STEPPER */
+.nb-stepper {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.nb-stepper::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+    background-color: var(--color-border);
+    z-index: 1;
+}
+
+.nb-step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+}
+
+.nb-step-circle {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 8px auto;
+    border: var(--border-solid);
+    background-color: var(--color-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.nb-step.active .nb-step-circle {
+    background-color: var(--color-text);
+    color: var(--color-text-inverted);
+}
+
+.nb-step.completed .nb-step-circle {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border-width: 3px;
+}
+
+.nb-step-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.2px;
+}
+
+.nb-step-desc {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+/* 12. NEO-BRUTALISM CONFIRMATION MODAL */
+.nb-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.nb-modal-box {
+    background: #ffffff;
+    border: 3px solid #000000;
+    box-shadow: 8px 8px 0px #000000;
+    max-width: 460px;
+    width: 90%;
+    padding: 24px;
+    animation: nbModalPop 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes nbModalPop {
+    from {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

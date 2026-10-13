@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/layout :: header('Danh mục Đề tài Bộ môn')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container pb-5">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Header Actions -->
+    <div class="nb-card d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-uppercase">DANH MỤC TỔNG HỢP ĐỀ TÀI BỘ MÔN</h4>
+            <p class="text-muted small mb-0 fw-semibold">
+                Thống kê toàn bộ danh mục đề tài, giảng viên hướng dẫn và trạng thái kiểm duyệt
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/dashboard" class="nb-btn nb-btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>DASHBOARD
+            </a>
+            <a href="/department/topics" class="nb-btn nb-btn-sm nb-btn-black">
+                <i class="bi bi-check2-circle me-1"></i>TRANG XÉT DUYỆT
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter by Registration Period -->
+    <div class="nb-card mb-4 p-3">
+        <form th:action="@{/department/catalog}" method="get" class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label class="fw-bold small text-uppercase">Lọc theo đợt:</label>
+            </div>
+            <div class="col-md-5">
+                <select name="periodId" class="nb-input py-1" onchange="this.form.submit()">
+                    <option value="">-- Tất cả các đợt đăng ký --</option>
+                    <option th:each="p : ${periods}" 
+                            th:value="${p.id}" 
+                            th:text="${p.name} + ' (' + ${p.periodType.displayName} + ' - ' + ${p.status.displayName} + ')'"
+                            th:selected="${selectedPeriodId != null && selectedPeriodId == p.id}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-auto" th:if="${selectedPeriodId != null}">
+                <a href="/department/catalog" class="nb-btn nb-btn-sm">XÓA LỌC</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="nb-card text-center py-3">
+                <span class="fs-3 fw-bold d-block" th:text="${#lists.size(topics)}">0</span>
+                <span class="small fw-bold text-uppercase text-muted">Tổng số đề tài</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="nb-card text-center py-3">
+                <span class="fs-3 fw-bold d-block text-warning" 
+                      th:text="${#lists.size(topics.?[status.name() == 'PENDING_DEPT'])}">0</span>
+                <span class="small fw-bold text-uppercase text-muted">Chờ bộ môn duyệt</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="nb-card text-center py-3">
+                <span class="fs-3 fw-bold d-block text-success" 
+                      th:text="${#lists.size(topics.?[status.name() == 'APPROVED'])}">0</span>
+                <span class="small fw-bold text-uppercase text-muted">Đã phê duyệt</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="nb-card text-center py-3">
+                <span class="fs-3 fw-bold d-block text-danger" 
+                      th:text="${#lists.size(topics.?[status.name() == 'REJECTED'])}">0</span>
+                <span class="small fw-bold text-uppercase text-muted">Từ chối / Yêu cầu sửa</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Topics Table -->
+    <div class="nb-table-container">
+        <table class="nb-table">
+            <thead>
+                <tr>
+                    <th style="width: 110px;">MÃ ĐỀ TÀI</th>
+                    <th>TÊN ĐỀ TÀI & YÊU CẦU</th>
+                    <th style="width: 160px;">ĐỢT ĐĂNG KÝ</th>
+                    <th style="width: 150px;">BỘ MÔN</th>
+                    <th style="width: 180px;">GV HƯỚNG DẪN</th>
+                    <th style="width: 140px;" class="text-center">TRẠNG THÁI</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(topics)}">
+                    <td colspan="6" class="text-center py-4 text-muted fw-bold">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        Không có đề tài nào trong danh mục.
+                    </td>
+                </tr>
+                <tr th:each="t : ${topics}">
+                    <td>
+                        <strong th:text="${t.code}">DT001</strong>
+                    </td>
+                    <td>
+                        <div class="fw-bold mb-1" th:text="${t.title}">Tên đề tài</div>
+                        <div class="small text-muted mb-1" th:if="${t.description != null}" th:text="${#strings.abbreviate(t.description, 130)}">Mô tả</div>
+                        <div class="small fw-semibold" th:if="${t.requirements != null}">
+                            <strong>Yêu cầu:</strong> <span th:text="${t.requirements}">Kiến thức</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="small fw-semibold" th:text="${t.period.name}">Đợt 1</span>
+                    </td>
+                    <td>
+                        <span class="small" th:text="${t.department.name}">Bộ môn</span>
+                    </td>
+                    <td>
+                        <div th:each="adv : ${t.advisors}" class="small">
+                            <span th:text="${adv.lecturer.fullName}">TS. Nguyễn Văn A</span>
+                            <span th:if="${adv.isPrimary}" class="nb-badge nb-badge-black py-0 px-1" style="font-size: 10px;">Chính</span>
+                            <span th:unless="${adv.isPrimary}" class="nb-badge py-0 px-1" style="font-size: 10px;">Đồng HD</span>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <span th:if="${t.status.name() == 'PENDING_DEPT'}" class="nb-badge nb-badge-warning" th:text="${t.status.displayName}">Chờ duyệt</span>
+                        <span th:if="${t.status.name() == 'APPROVED'}" class="nb-badge nb-badge-success" th:text="${t.status.displayName}">Đã duyệt</span>
+                        <span th:if="${t.status.name() == 'REJECTED'}" class="nb-badge nb-badge-danger" th:text="${t.status.displayName}">Từ chối</span>
+                        <span th:if="${t.status.name() == 'ASSIGNED'}" class="nb-badge nb-badge-black" th:text="${t.status.displayName}">Đã có nhóm</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/layout :: header('Đề tài của tôi')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container pb-5">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Header Actions -->
+    <div class="nb-card d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-uppercase">DANH SÁCH ĐỀ TÀI CỦA TÔI</h4>
+            <p class="text-muted small mb-0 fw-semibold">Theo dõi đề xuất, trạng thái phê duyệt bộ môn và nhóm sinh viên thực hiện</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/dashboard" class="nb-btn nb-btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>DASHBOARD
+            </a>
+            <!-- Tải file mẫu Excel đề tài -->
+            <a href="/lecturer/topics/template" class="nb-btn nb-btn-sm" title="Tải file Excel mẫu">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i>TẢI MẪU EXCEL
+            </a>
+            <!-- Nút bật hộp upload Excel -->
+            <button type="button" class="nb-btn nb-btn-sm" onclick="toggleTopicUploadBox()">
+                <i class="bi bi-file-earmark-arrow-up me-1"></i>NHẬP TỪ EXCEL
+            </button>
+            <a href="/lecturer/topics/create" class="nb-btn nb-btn-black">
+                <i class="bi bi-plus-circle me-1"></i>ĐỀ XUẤT ĐỀ TÀI MỚI
+            </a>
+        </div>
+    </div>
+
+    <!-- Hộp Upload Excel Đề Tài (Neo-Brutalism B&W) -->
+    <div id="topicExcelUploadBox" class="nb-card mb-4" style="display: none; border-left: 8px solid #000;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-uppercase mb-0">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>NHẬP HÀNG LOẠT ĐỀ TÀI TỪ EXCEL
+            </h5>
+            <button type="button" class="nb-btn nb-btn-sm" onclick="toggleTopicUploadBox()">ĐÓNG</button>
+        </div>
+        <p class="small text-muted mb-3">
+            Tải lên file <code>.xlsx</code> chứa danh sách các đề tài cần nộp. Vui lòng chọn đợt đăng ký tương ứng và dùng đúng 
+            <a href="/lecturer/topics/template" class="fw-bold text-dark text-decoration-underline">File Mẫu Excel</a>.
+        </p>
+        <div th:if="${#lists.isEmpty(activePeriods)}" class="nb-alert nb-alert-warning mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> Hiện tại không có Đợt đăng ký nào đang mở cổng cho Giảng viên nộp đề tài (OPEN_LECTURER).
+        </div>
+        <form th:if="${!#lists.isEmpty(activePeriods)}" th:action="@{/lecturer/topics/upload-excel}" method="post" enctype="multipart/form-data" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <select name="periodId" class="nb-input py-1" required>
+                    <option value="">-- Chọn đợt nộp đề tài --</option>
+                    <option th:each="ap : ${activePeriods}" th:value="${ap.id}" th:text="${ap.name} + ' (' + ${ap.periodType.displayName} + ')'"></option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <input type="file" name="file" accept=".xlsx, .xls" class="form-control py-1" required>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="nb-btn nb-btn-black w-100">
+                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> TẢI LÊN
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter by Registration Period -->
+    <div class="nb-card mb-4 p-3">
+        <form th:action="@{/lecturer/topics}" method="get" class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label class="fw-bold small text-uppercase">Lọc theo đợt:</label>
+            </div>
+            <div class="col-md-5">
+                <select name="periodId" class="nb-input py-1" onchange="this.form.submit()">
+                    <option value="">-- Tất cả các đợt đăng ký --</option>
+                    <option th:each="p : ${periods}" 
+                            th:value="${p.id}" 
+                            th:text="${p.name} + ' (' + ${p.periodType.displayName} + ')'"
+                            th:selected="${selectedPeriodId != null && selectedPeriodId == p.id}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-auto" th:if="${selectedPeriodId != null}">
+                <a href="/lecturer/topics" class="nb-btn nb-btn-sm">XÓA LỌC</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Topics Table -->
+    <div class="nb-table-container">
+        <table class="nb-table">
+            <thead>
+                <tr>
+                    <th style="width: 120px;">MÃ ĐỀ TÀI</th>
+                    <th>TÊN ĐỀ TÀI</th>
+                    <th style="width: 180px;">ĐỢT ĐĂNG KÝ</th>
+                    <th style="width: 160px;">BỘ MÔN</th>
+                    <th style="width: 180px;">GV HƯỚNG DẪN</th>
+                    <th style="width: 150px;">TRẠNG THÁI</th>
+                    <th style="width: 140px;" class="text-center">THAO TÁC</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(topics)}">
+                    <td colspan="7" class="text-center py-4 text-muted fw-bold">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        Bạn chưa đề xuất đề tài nào trong đợt này.
+                    </td>
+                </tr>
+                <tr th:each="t : ${topics}">
+                    <td>
+                        <span class="fw-bold" th:text="${t.code}">DT001</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold" th:text="${t.title}">Tên đề tài</div>
+                        <div th:if="${t.rejection_reason != null and t.status.name() == 'REJECTED'}" class="text-danger small mt-1">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i><strong>Lý do từ chối:</strong> <span th:text="${t.rejection_reason}">Lý do</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="small fw-semibold" th:text="${t.period.name}">Đợt 1</span>
+                    </td>
+                    <td>
+                        <span class="small" th:text="${t.department.name}">Công nghệ phần mềm</span>
+                    </td>
+                    <td>
+                        <div th:each="adv : ${t.advisors}" class="small">
+                            <span th:text="${adv.lecturer.fullName}">TS. Nguyễn Văn A</span>
+                            <span th:if="${adv.isPrimary}" class="nb-badge nb-badge-black py-0 px-1" style="font-size: 10px;">Chính</span>
+                            <span th:unless="${adv.isPrimary}" class="nb-badge py-0 px-1" style="font-size: 10px;">Đồng HD</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span th:if="${t.status.name() == 'PENDING_DEPT'}" class="nb-badge nb-badge-warning" th:text="${t.status.displayName}">Chờ duyệt</span>
+                        <span th:if="${t.status.name() == 'APPROVED'}" class="nb-badge nb-badge-success" th:text="${t.status.displayName}">Đã duyệt</span>
+                        <span th:if="${t.status.name() == 'REJECTED'}" class="nb-badge nb-badge-danger" th:text="${t.status.displayName}">Từ chối</span>
+                        <span th:if="${t.status.name() == 'ASSIGNED'}" class="nb-badge nb-badge-black" th:text="${t.status.displayName}">Đã có nhóm</span>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-1" th:if="${t.status.name() == 'PENDING_DEPT' or t.status.name() == 'REJECTED'}">
+                            <a th:href="@{'/lecturer/topics/edit/' + ${t.id}}" class="nb-btn nb-btn-sm" title="Sửa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <form th:action="@{'/lecturer/topics/delete/' + ${t.id}}" method="post" class="d-inline m-0"
+                                  th:id="'deleteTopicForm_' + ${t.id}">
+                                <button type="button" class="nb-btn nb-btn-sm text-danger" title="Xóa"
+                                        th:onclick="'confirmDeleteTopic(' + ${t.id} + ', \'' + ${t.title} + '\')'">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <span th:unless="${t.status.name() == 'PENDING_DEPT' or t.status.name() == 'REJECTED'}" class="small text-muted fw-bold">
+                            Khóa sửa
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    function toggleTopicUploadBox() {
+        const box = document.getElementById('topicExcelUploadBox');
+        if (box.style.display === 'none' || box.style.display === '') {
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    async function confirmDeleteTopic(topicId, topicTitle) {
+        const confirmed = await openNbConfirm(
+            'Bạn có chắc chắn muốn xóa đề tài "' + topicTitle + '" không? Hành động này không thể hoàn tác.',
+            'XÓA ĐỀ TÀI'
+        );
+        if (confirmed) {
+            document.getElementById('deleteTopicForm_' + topicId).submit();
+        }
+    }
+</script>
+
+</body>
+</html>

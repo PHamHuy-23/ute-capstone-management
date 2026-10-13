@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/layout :: header('Xét duyệt đề tài - Bộ môn')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container pb-5">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Header Actions -->
+    <div class="nb-card d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-uppercase">XÉT DUYỆT ĐỀ TÀI BỘ MÔN</h4>
+            <p class="text-muted small mb-0 fw-semibold">
+                Phê duyệt danh mục đề tài do Giảng viên đề xuất trước khi mở cổng cho Sinh viên đăng ký
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/dashboard" class="nb-btn nb-btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>DASHBOARD
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter by Registration Period -->
+    <div class="nb-card mb-4 p-3">
+        <form th:action="@{/department/topics}" method="get" class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label class="fw-bold small text-uppercase">Lọc theo đợt:</label>
+            </div>
+            <div class="col-md-5">
+                <select name="periodId" class="nb-input py-1" onchange="this.form.submit()">
+                    <option value="">-- Tất cả các đợt đăng ký --</option>
+                    <option th:each="p : ${periods}" 
+                            th:value="${p.id}" 
+                            th:text="${p.name} + ' (' + ${p.periodType.displayName} + ')'"
+                            th:selected="${selectedPeriodId != null && selectedPeriodId == p.id}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-auto" th:if="${selectedPeriodId != null}">
+                <a href="/department/topics" class="nb-btn nb-btn-sm">XÓA LỌC</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Topics Table -->
+    <div class="nb-table-container">
+        <table class="nb-table">
+            <thead>
+                <tr>
+                    <th style="width: 110px;">MÃ ĐỀ TÀI</th>
+                    <th>TÊN ĐỀ TÀI & NỘI DUNG</th>
+                    <th style="width: 160px;">ĐỢT ĐĂNG KÝ</th>
+                    <th style="width: 150px;">BỘ MÔN</th>
+                    <th style="width: 170px;">GV HƯỚNG DẪN</th>
+                    <th style="width: 140px;">TRẠNG THÁI</th>
+                    <th style="width: 180px;" class="text-center">XÉT DUYỆT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(topics)}">
+                    <td colspan="7" class="text-center py-4 text-muted fw-bold">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        Không có đề tài nào cần hiển thị.
+                    </td>
+                </tr>
+                <tr th:each="t : ${topics}">
+                    <td>
+                        <span class="fw-bold" th:text="${t.code}">DT001</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold mb-1" th:text="${t.title}">Tên đề tài</div>
+                        <div class="small text-muted mb-1" th:if="${t.description != null}" th:text="${#strings.abbreviate(t.description, 120)}">Mô tả</div>
+                        <div th:if="${t.rejection_reason != null and t.status.name() == 'REJECTED'}" class="text-danger small">
+                            <i class="bi bi-x-circle-fill me-1"></i><strong>Lý do từ chối:</strong> <span th:text="${t.rejection_reason}">Lý do</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="small fw-semibold" th:text="${t.period.name}">Đợt 1</span>
+                    </td>
+                    <td>
+                        <span class="small" th:text="${t.department.name}">Bộ môn</span>
+                    </td>
+                    <td>
+                        <div th:each="adv : ${t.advisors}" class="small">
+                            <span th:text="${adv.lecturer.fullName}">TS. Nguyễn Văn A</span>
+                            <span th:if="${adv.isPrimary}" class="nb-badge nb-badge-black py-0 px-1" style="font-size: 10px;">Chính</span>
+                            <span th:unless="${adv.isPrimary}" class="nb-badge py-0 px-1" style="font-size: 10px;">Đồng HD</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span th:if="${t.status.name() == 'PENDING_DEPT'}" class="nb-badge nb-badge-warning" th:text="${t.status.displayName}">Chờ duyệt</span>
+                        <span th:if="${t.status.name() == 'APPROVED'}" class="nb-badge nb-badge-success" th:text="${t.status.displayName}">Đã duyệt</span>
+                        <span th:if="${t.status.name() == 'REJECTED'}" class="nb-badge nb-badge-danger" th:text="${t.status.displayName}">Từ chối</span>
+                        <span th:if="${t.status.name() == 'ASSIGNED'}" class="nb-badge nb-badge-black" th:text="${t.status.displayName}">Đã có nhóm</span>
+                    </td>
+                    <td class="text-center">
+                        <div th:if="${t.status.name() == 'PENDING_DEPT'}" class="d-flex justify-content-center gap-1">
+                            <!-- Nút Duyệt trực tiếp -->
+                            <form th:action="@{/department/topics/approve}" method="post" class="d-inline m-0">
+                                <input type="hidden" name="topicId" th:value="${t.id}">
+                                <input type="hidden" name="approved" value="true">
+                                <button type="submit" class="nb-btn nb-btn-sm nb-btn-black" title="Phê duyệt đề tài">
+                                    <i class="bi bi-check-lg me-1"></i>DUYỆT
+                                </button>
+                            </form>
+                            <!-- Nút Từ chối (mở modal/popup nhập lý do) -->
+                            <button type="button" class="nb-btn nb-btn-sm text-danger" 
+                                    th:data-id="${t.id}"
+                                    th:data-title="${t.title}"
+                                    onclick="openRejectModalFromBtn(this)"
+                                    title="Từ chối đề tài">
+                                <i class="bi bi-x-lg me-1"></i>TỪ CHỐI
+                            </button>
+                        </div>
+                        <span th:unless="${t.status.name() == 'PENDING_DEPT'}" class="small text-muted fw-bold">
+                            Đã xử lý
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Modal Nhập lý do từ chối (Thuần CSS/JS Neo-Brutalism, không phụ thuộc nặng JS bên ngoài) -->
+<div id="rejectModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1050; align-items: center; justify-content: center;">
+    <div class="nb-card" style="width: 500px; max-width: 90%; background: #fff; box-shadow: 8px 8px 0px #000;">
+        <div class="d-flex justify-content-between align-items-center border-bottom border-3 border-dark pb-2 mb-3">
+            <h5 class="fw-bold mb-0 text-uppercase text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>TỪ CHỐI ĐỀ TÀI</h5>
+            <button type="button" class="nb-btn nb-btn-sm" onclick="closeRejectModal()">✕</button>
+        </div>
+        <p class="small fw-semibold mb-2" id="rejectTopicTitle">Đang chọn đề tài...</p>
+        <form th:action="@{/department/topics/approve}" method="post">
+            <input type="hidden" id="rejectTopicId" name="topicId" value="">
+            <input type="hidden" name="approved" value="false">
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-uppercase">Lý do từ chối <span class="text-danger">*</span></label>
+                <textarea name="rejectionReason" class="nb-input" rows="3" placeholder="Nhập lý do chi tiết để giảng viên chỉnh sửa..." required></textarea>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="nb-btn nb-btn-sm" onclick="closeRejectModal()">HỦY</button>
+                <button type="submit" class="nb-btn nb-btn-sm nb-btn-black text-danger">XÁC NHẬN TỪ CHỐI</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openRejectModalFromBtn(btn) {
+        var topicId = btn.getAttribute('data-id');
+        var title = btn.getAttribute('data-title');
+        openRejectModal(topicId, title);
+    }
+
+    function openRejectModal(topicId, title) {
+        document.getElementById('rejectTopicId').value = topicId;
+        document.getElementById('rejectTopicTitle').innerText = 'Đề tài: ' + title;
+        var modal = document.getElementById('rejectModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeRejectModal() {
+        var modal = document.getElementById('rejectModal');
+        modal.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

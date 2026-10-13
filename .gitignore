@@ -26,3 +26,9 @@ logs/
 ### 5. Local Environment / Secret overrides ###
 .env
 application-local.properties
+
+### 6. Local Uploads & Temp Scripts ###
+uploads/
+run_build.py
+run_gen.py
+test_docx_env.py

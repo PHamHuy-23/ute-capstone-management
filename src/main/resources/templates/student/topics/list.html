@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/layout :: header('Danh mục Đề tài Sinh viên')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container pb-5">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Header Actions -->
+    <div class="nb-card d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-uppercase">DANH MỤC ĐỀ TÀI CHÍNH THỨC</h4>
+            <p class="text-muted small mb-0 fw-semibold">
+                Duyệt các đề tài đã được Khoa & Bộ môn phê duyệt để lựa chọn cho nhóm của bạn
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/dashboard" class="nb-btn nb-btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>DASHBOARD
+            </a>
+            <a href="/student/group" class="nb-btn nb-btn-black">
+                <i class="bi bi-people-fill me-1"></i>VỀ NHÓM CỦA TÔI
+            </a>
+        </div>
+    </div>
+
+    <!-- Banner Trạng thái nhóm của sinh viên -->
+    <div class="nb-card mb-4 p-3 bg-light" style="border-left: 8px solid #000;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <span class="small fw-bold text-uppercase me-2">TRẠNG THÁI HIỆN TẠI:</span>
+                <span th:if="${studentGroup == null}" class="nb-badge nb-badge-warning">CHƯA CÓ NHÓM</span>
+                <span th:if="${studentGroup != null and studentGroup.topic == null}" class="nb-badge nb-badge-black" 
+                      th:text="'NHÓM: ' + ${studentGroup.groupCode} + ' (CHƯA ĐĂNG KÝ ĐỀ TÀI)'"></span>
+                <span th:if="${studentGroup != null and studentGroup.topic != null}" class="nb-badge nb-badge-success" 
+                      th:text="'NHÓM: ' + ${studentGroup.groupCode} + ' - ĐÃ NHẬN: ' + ${studentGroup.topic.code}"></span>
+            </div>
+            <div>
+                <a th:if="${studentGroup == null}" href="/student/group" class="nb-btn nb-btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>TẠO NHÓM ĐỂ ĐĂNG KÝ
+                </a>
+                <span th:if="${studentGroup != null and !isLeader}" class="small text-muted fw-bold">
+                    <i class="bi bi-info-circle me-1"></i>Bạn là thành viên. Chỉ Nhóm trưởng mới có quyền đăng ký đề tài.
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter by Registration Period -->
+    <div class="nb-card mb-4 p-3">
+        <form th:action="@{/student/topics}" method="get" class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label class="fw-bold small text-uppercase">Đợt đăng ký:</label>
+            </div>
+            <div class="col-md-5">
+                <select name="periodId" class="nb-input py-1" onchange="this.form.submit()">
+                    <option th:each="p : ${periods}" 
+                            th:value="${p.id}" 
+                            th:text="${p.name} + ' (' + ${p.periodType.displayName} + ' - ' + ${p.status.displayName} + ')'"
+                            th:selected="${selectedPeriodId != null && selectedPeriodId == p.id}">
+                    </option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Danh sách Đề tài -->
+    <div class="nb-table-container">
+        <table class="nb-table">
+            <thead>
+                <tr>
+                    <th style="width: 110px;">MÃ ĐỀ TÀI</th>
+                    <th>TÊN ĐỀ TÀI & NỘI DUNG</th>
+                    <th style="width: 160px;">BỘ MÔN</th>
+                    <th style="width: 180px;">GV HƯỚNG DẪN</th>
+                    <th style="width: 150px;">TRẠNG THÁI</th>
+                    <th style="width: 170px;" class="text-center">HÀNH ĐỘNG</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(topics)}">
+                    <td colspan="6" class="text-center py-4 text-muted fw-bold">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        Chưa có đề tài nào được công bố trong đợt này.
+                    </td>
+                </tr>
+                <tr th:each="t : ${topics}">
+                    <td>
+                        <span class="fw-bold" th:text="${t.code}">DT001</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold mb-1" th:text="${t.title}">Tên đề tài</div>
+                        <div class="small text-muted mb-1" th:if="${t.description != null}" th:text="${#strings.abbreviate(t.description, 130)}">Mô tả</div>
+                        <div class="small fw-semibold text-dark" th:if="${t.requirements != null}">
+                            <strong>Yêu cầu:</strong> <span th:text="${t.requirements}">Java, React...</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="small" th:text="${t.department.name}">Công nghệ phần mềm</span>
+                    </td>
+                    <td>
+                        <div th:each="adv : ${t.advisors}" class="small">
+                            <span th:text="${adv.lecturer.fullName}">TS. Nguyễn Văn A</span>
+                            <span th:if="${adv.isPrimary}" class="nb-badge nb-badge-black py-0 px-1" style="font-size: 10px;">Chính</span>
+                            <span th:unless="${adv.isPrimary}" class="nb-badge py-0 px-1" style="font-size: 10px;">Đồng HD</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span th:if="${t.status.name() == 'APPROVED'}" class="nb-badge nb-badge-success">CÒN TRỐNG</span>
+                        <span th:if="${t.status.name() == 'ASSIGNED'}" class="nb-badge nb-badge-black">ĐÃ CÓ NHÓM</span>
+                        <span th:if="${t.status.name() == 'PENDING_DEPT'}" class="nb-badge nb-badge-warning">CHỜ DUYỆT</span>
+                        <span th:if="${t.status.name() == 'REJECTED'}" class="nb-badge nb-badge-danger">TỪ CHỐI</span>
+                    </td>
+                    <td class="text-center">
+                        <!-- Trường hợp 1: Đề tài còn trống (APPROVED) và người xem là Leader và nhóm chưa có đề tài -->
+                        <div th:if="${t.status.name() == 'APPROVED' and studentGroup != null and isLeader and studentGroup.topic == null}">
+                            <form th:action="@{/student/topics/register}" method="post" class="d-inline m-0"
+                                  th:id="'registerTopicForm_' + ${t.id}">
+                                <input type="hidden" name="groupId" th:value="${studentGroup.id}">
+                                <input type="hidden" name="topicId" th:value="${t.id}">
+                                <button type="button" class="nb-btn nb-btn-sm nb-btn-black"
+                                        th:onclick="'confirmRegisterTopic(' + ${t.id} + ', \'' + ${t.title} + '\')'">
+                                    <i class="bi bi-check-circle-fill me-1"></i>ĐĂNG KÝ
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Trường hợp 2: Đề tài này chính là đề tài nhóm mình đang giữ -->
+                        <span th:if="${studentGroup != null and studentGroup.topic != null and studentGroup.topic.id == t.id}" 
+                              class="nb-badge nb-badge-black">
+                            NHÓM CỦA BẠN
+                        </span>
+
+                        <!-- Trường hợp 3: Đề tài đã có nhóm khác nhận -->
+                        <span th:if="${t.status.name() == 'ASSIGNED' and (studentGroup == null or studentGroup.topic == null or studentGroup.topic.id != t.id)}" 
+                              class="small text-muted fw-bold">
+                            Hết chỗ
+                        </span>
+
+                        <!-- Trường hợp 4: Chưa có nhóm -->
+                        <div th:if="${studentGroup == null and t.status.name() == 'APPROVED'}">
+                            <a href="/student/group" class="nb-btn nb-btn-sm" title="Tạo nhóm trước để đăng ký">
+                                TẠO NHÓM
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    async function confirmRegisterTopic(topicId, topicTitle) {
+        const confirmed = await openNbConfirm(
+            'Bạn có chắc chắn muốn đăng ký đề tài "' + topicTitle + '" cho nhóm của mình?',
+            'ĐĂNG KÝ ĐỀ TÀI'
+        );
+        if (confirmed) {
+            document.getElementById('registerTopicForm_' + topicId).submit();
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/layout :: header('Đề xuất đề tài mới')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container pb-5">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="nb-card">
+                <div class="d-flex justify-content-between align-items-center border-bottom border-3 border-dark pb-3 mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1 text-uppercase">ĐỀ XUẤT ĐỀ TÀI MỚI</h4>
+                        <p class="text-muted small mb-0 fw-semibold">Đăng ký đề tài hướng dẫn trong đợt mở cổng tiếp nhận</p>
+                    </div>
+                    <a href="/lecturer/topics" class="nb-btn nb-btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>QUAY LẠI
+                    </a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(activePeriods)}" class="nb-alert nb-alert-warning mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Hiện tại không có Đợt đăng ký nào đang mở cổng cho Giảng viên đề xuất (Trạng thái <code>OPEN_LECTURER</code>). Vui lòng liên hệ Trưởng khoa để mở đợt!
+                </div>
+
+                <form th:action="@{/lecturer/topics/create}" th:object="${topicForm}" method="post">
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-uppercase small">Đợt đăng ký <span class="text-danger">*</span></label>
+                            <select th:field="*{periodId}" class="nb-input" th:classappend="${#fields.hasErrors('periodId')} ? 'is-invalid' : ''" required>
+                                <option value="">-- Chọn đợt đăng ký --</option>
+                                <option th:each="p : ${activePeriods}" 
+                                        th:value="${p.id}" 
+                                        th:text="${p.name} + ' (' + ${p.periodType.displayName} + ')'">
+                                </option>
+                            </select>
+                            <div class="invalid-feedback d-block text-danger fw-bold small" th:if="${#fields.hasErrors('periodId')}" th:errors="*{periodId}"></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-uppercase small">Bộ môn quản lý <span class="text-danger">*</span></label>
+                            <select th:field="*{departmentId}" class="nb-input" th:classappend="${#fields.hasErrors('departmentId')} ? 'is-invalid' : ''" required>
+                                <option value="">-- Chọn bộ môn --</option>
+                                <option th:each="d : ${departments}" 
+                                        th:value="${d.id}" 
+                                        th:text="${d.name}">
+                                </option>
+                            </select>
+                            <div class="invalid-feedback d-block text-danger fw-bold small" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-uppercase small">Mã đề tài <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{code}" class="nb-input" placeholder="VD: DT2026-01" 
+                                   th:classappend="${#fields.hasErrors('code')} ? 'is-invalid' : ''" required>
+                            <div class="invalid-feedback d-block text-danger fw-bold small" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold text-uppercase small">Giảng viên đồng hướng dẫn (Tùy chọn, tối đa 1 GV)</label>
+                            <select th:field="*{coLecturerId}" class="nb-input">
+                                <option value="">-- Không có GV đồng hướng dẫn --</option>
+                                <option th:each="l : ${otherLecturers}" 
+                                        th:value="${l.id}" 
+                                        th:text="${l.fullName} + ' (' + ${l.username} + ')'">
+                                </option>
+                            </select>
+                            <div class="form-text small">Theo quy chế, một đề tài có tối thiểu 1 và tối đa 2 GVHD. Bạn mặc định là GVHD chính.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-uppercase small">Tên đề tài <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{title}" class="nb-input" placeholder="Nhập tên đề tài chi tiết..." 
+                               th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''" required>
+                        <div class="invalid-feedback d-block text-danger fw-bold small" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-uppercase small">Mục tiêu & Nội dung mô tả</label>
+                        <textarea th:field="*{description}" class="nb-input" rows="4" placeholder="Mô tả mục tiêu, bài toán và phạm vi đề tài..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase small">Yêu cầu đối với sinh viên</label>
+                        <textarea th:field="*{requirements}" class="nb-input" rows="3" placeholder="Kiến thức tiên quyết, công nghệ yêu cầu (Java, Spring, AI, React...)..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top border-2 border-dark">
+                        <a href="/lecturer/topics" class="nb-btn">HỦY BỎ</a>
+                        <button type="submit" class="nb-btn nb-btn-black" th:disabled="${#lists.isEmpty(activePeriods)}">
+                            <i class="bi bi-send-fill me-1"></i> GỬI PHÊ DUYỆT BỘ MÔN
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

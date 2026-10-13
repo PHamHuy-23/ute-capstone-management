@@ -27,9 +27,9 @@ public class SecurityConfig {
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login").permitAll()
                 // Phân quyền theo vai trò
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/department/**").hasRole("DEPARTMENT_HEAD")
-                .requestMatchers("/lecturer/**").hasRole("LECTURER")
-                .requestMatchers("/student/**").hasRole("STUDENT")
+                .requestMatchers("/department/**").hasAnyRole("DEPARTMENT_HEAD", "ADMIN")
+                .requestMatchers("/lecturer/**").hasAnyRole("LECTURER", "ADMIN")
+                .requestMatchers("/student/**").hasAnyRole("STUDENT", "ADMIN")
                 // Mọi request còn lại yêu cầu phải đăng nhập
                 .anyRequest().authenticated()
             )

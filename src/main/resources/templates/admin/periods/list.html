@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/layout :: header('Quản lý Đợt Đăng Ký')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container pb-5">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Header Actions -->
+    <div class="nb-card d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-uppercase">QUẢN LÝ ĐỢT ĐĂNG KÝ ĐỀ TÀI</h4>
+            <p class="text-muted small mb-0 fw-semibold">Thiết lập thời gian đăng ký đề tài cho Giảng viên, Sinh viên và Hội đồng</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/dashboard" class="nb-btn nb-btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>DASHBOARD
+            </a>
+            <!-- Nút Tải file mẫu Excel -->
+            <a href="/admin/periods/template" class="nb-btn nb-btn-sm" title="Tải file Excel mẫu">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i>TẢI FILE MẪU EXCEL
+            </a>
+            <!-- Nút mở form Upload Excel -->
+            <button type="button" class="nb-btn nb-btn-sm" onclick="toggleUploadBox()">
+                <i class="bi bi-file-earmark-arrow-up me-1"></i>NHẬP TỪ EXCEL
+            </button>
+            <a href="/admin/periods/create" class="nb-btn nb-btn-black">
+                <i class="bi bi-calendar-plus me-1"></i>TẠO THỦ CÔNG
+            </a>
+        </div>
+    </div>
+
+    <!-- Hộp Upload Excel (Ẩn / Hiện mượt mà chuẩn Neo-Brutalism) -->
+    <div id="excelUploadBox" class="nb-card mb-4" style="display: none; border-left: 8px solid #000;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-uppercase mb-0">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>NHẬP HÀNG LOẠT ĐỢT ĐĂNG KÝ TỪ EXCEL
+            </h5>
+            <button type="button" class="nb-btn nb-btn-sm" onclick="toggleUploadBox()">ĐÓNG</button>
+        </div>
+        <p class="small text-muted mb-3">
+            Hệ thống hỗ trợ file <code>.xlsx</code> hoặc <code>.xls</code>. Vui lòng sử dụng đúng cấu trúc các cột theo 
+            <a href="/admin/periods/template" class="fw-bold text-dark text-decoration-underline">File Excel Mẫu</a> để không bị từ chối dữ liệu.
+        </p>
+        <form th:action="@{/admin/periods/upload-excel}" method="post" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center gap-2">
+            <input type="file" name="file" accept=".xlsx, .xls" class="form-control w-auto" style="min-width: 320px;" required>
+            <button type="submit" class="nb-btn nb-btn-black">
+                <i class="bi bi-cloud-arrow-up-fill me-1"></i> TẢI LÊN & XỬ LÝ
+            </button>
+        </form>
+    </div>
+
+    <!-- Periods Table -->
+    <div class="nb-table-container">
+        <table class="nb-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">ID</th>
+                    <th>TÊN ĐỢT</th>
+                    <th>LOẠI ĐỢT</th>
+                    <th>HẠN GV ĐĂNG KÝ</th>
+                    <th>HẠN SV ĐĂNG KÝ</th>
+                    <th>HẠN CHẤM / BÁO CÁO</th>
+                    <th>TRẠNG THÁI</th>
+                    <th style="width: 220px;" class="text-center">THAO TÁC</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${periods}">
+                    <td class="fw-bold" th:text="${p.id}">1</td>
+                    <td>
+                        <strong class="d-block" th:text="${p.name}">KLTN Học kỳ 1</strong>
+                    </td>
+                    <td>
+                        <span class="nb-badge" th:text="${p.periodType.displayName}">Khóa luận tốt nghiệp</span>
+                    </td>
+                    <td class="small">
+                        <div th:text="${#temporals.format(p.lecturerStartDate, 'dd/MM/yyyy HH:mm')}"></div>
+                        <div class="text-muted" th:text="'đến ' + ${#temporals.format(p.lecturerEndDate, 'dd/MM/yyyy HH:mm')}"></div>
+                    </td>
+                    <td class="small">
+                        <div th:text="${#temporals.format(p.studentStartDate, 'dd/MM/yyyy HH:mm')}"></div>
+                        <div class="text-muted" th:text="'đến ' + ${#temporals.format(p.studentEndDate, 'dd/MM/yyyy HH:mm')}"></div>
+                    </td>
+                    <td class="small">
+                        <div th:if="${p.reviewDeadline != null}">
+                            <strong>GVPB:</strong> <span th:text="${#temporals.format(p.reviewDeadline, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div th:if="${p.defenseDate != null}">
+                            <strong>HĐ:</strong> <span th:text="${#temporals.format(p.defenseDate, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div th:if="${p.reviewDeadline == null and p.defenseDate == null}" class="text-muted">-</div>
+                    </td>
+                    <td>
+                        <!-- Hiển thị badge trạng thái -->
+                        <span class="nb-badge"
+                              th:classappend="${p.status.name() == 'OPEN_LECTURER' or p.status.name() == 'OPEN_STUDENT' ? 'nb-badge-black' : ''}"
+                              th:text="${p.status.displayName}">
+                            DRAFT
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center align-items-center gap-1">
+                            <!-- Chuyển trạng thái nhanh -->
+                            <form th:action="@{/admin/periods/status/{id}(id=${p.id})}" method="post" class="d-inline m-0">
+                                <select name="status" class="form-select form-select-sm d-inline-block w-auto py-1" onchange="this.form.submit()">
+                                    <option th:each="st : ${allStatuses}" 
+                                            th:value="${st}" 
+                                            th:text="${st.displayName}"
+                                            th:selected="${st == p.status}">
+                                    </option>
+                                </select>
+                            </form>
+                            <!-- Nút sửa -->
+                            <a th:href="@{/admin/periods/edit/{id}(id=${p.id})}" class="nb-btn nb-btn-sm" title="Chỉnh sửa">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <!-- Nút xóa (An toàn: Chặn xóa nếu đã có đề tài) -->
+                            <form th:action="@{/admin/periods/delete/{id}(id=${p.id})}" method="post" class="d-inline m-0"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa đợt đăng ký này không? (Lưu ý: Không thể xóa nếu đã có đề tài)');">
+                                <button type="submit" class="nb-btn nb-btn-sm text-danger" title="Xóa đợt">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(periods)}">
+                    <td colspan="8" class="text-center py-4 fw-bold">CHƯA CÓ ĐỢT ĐĂNG KÝ NÀO ĐƯỢC TẠO</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    function toggleUploadBox() {
+        const box = document.getElementById('excelUploadBox');
+        if (box.style.display === 'none' || box.style.display === '') {
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

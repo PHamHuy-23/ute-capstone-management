@@ -6,52 +6,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng điều khiển - HCMUTE Capstone</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .navbar-custom {
-            background-color: #1e3c72;
-        }
-        .feature-card {
-            border: none;
-            border-radius: 12px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-        }
-        .icon-box {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/brutalism.css}">
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="/dashboard">
-            <i class="bi bi-mortarboard-fill me-2"></i>HCMUTE Capstone
+<!-- Navbar Brutalism -->
+<nav class="nb-navbar mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand text-uppercase" href="/dashboard">
+            <i class="bi bi-mortarboard-fill me-2"></i>HCMUTE CAPSTONE
         </a>
-        <div class="d-flex align-items-center text-white">
-            <span class="me-3 small">
-                Xin chào, <strong th:text="${fullName}">Người dùng</strong>
-                <span class="badge bg-light text-dark ms-1" sec:authentication="principal.authorities"></span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="small fw-bold">
+                XIN CHÀO: <span class="text-decoration-underline" th:text="${fullName}">NGƯỜI DÙNG</span>
+                <span class="nb-badge nb-badge-black ms-2" sec:authentication="principal.authorities"></span>
             </span>
-            <form th:action="@{/logout}" method="post" class="d-inline">
-                <button type="submit" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right me-1"></i>Đăng xuất
+            <form th:action="@{/logout}" method="post" class="d-inline m-0">
+                <button type="submit" class="nb-btn nb-btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>ĐĂNG XUẤT
                 </button>
             </form>
         </div>
@@ -61,197 +36,236 @@
 <!-- Main Container -->
 <div class="container pb-5">
 
-    <!-- Welcome Banner -->
-    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-        <div class="d-flex align-items-center">
-            <div class="bg-primary text-white p-3 rounded-circle me-3">
-                <i class="bi bi-person-badge fs-2"></i>
-            </div>
-            <div>
-                <h4 class="fw-bold mb-1" th:text="'Chào mừng ' + ${fullName} + '!'">Chào mừng bạn!</h4>
-                <p class="text-muted mb-0 small">
-                    <span class="badge bg-secondary me-2" th:text="${departmentName}">Bộ môn</span>
-                    Hệ thống Quản lý Đề tài Sinh viên - Khoa CNTT HCMUTE
-                </p>
-            </div>
+    <!-- User Header Card -->
+    <div class="nb-card d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1 text-uppercase" th:text="'CHÀO MỪNG: ' + ${fullName}">CHÀO MỪNG BẠN</h3>
+            <p class="mb-0 fw-semibold">
+                <span class="nb-badge me-2" th:text="${departmentName}">BỘ MÔN</span>
+                <span>HỆ THỐNG QUẢN LÝ ĐỀ TÀI SINH VIÊN - KHOA CNTT</span>
+            </p>
         </div>
     </div>
 
     <!-- 1. PHÂN HỆ TRƯỞNG KHOA (ROLE_ADMIN) -->
-    <div sec:authorize="hasRole('ADMIN')" class="mb-4">
-        <h5 class="fw-bold text-danger border-start border-4 border-danger ps-2 mb-3">
-            <i class="bi bi-shield-lock-fill me-1"></i> Bảng điều khiển Trưởng khoa (Admin)
+    <div sec:authorize="hasRole('ADMIN')" class="mb-5">
+        <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
+            <i class="bi bi-shield-lock-fill me-2"></i>PHÂN HỆ TRƯỞNG KHOA (ADMIN)
         </h5>
+
+        <!-- Overview KPI Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="nb-card p-3 text-center">
+                    <div class="text-muted small fw-bold text-uppercase mb-1">Tổng Đề Tài</div>
+                    <div class="fs-2 fw-black" th:text="${totalTopics}">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="nb-card p-3 text-center">
+                    <div class="text-muted small fw-bold text-uppercase mb-1">Tổng Nhóm SV</div>
+                    <div class="fs-2 fw-black" th:text="${totalGroups}">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="nb-card p-3 text-center">
+                    <div class="text-muted small fw-bold text-uppercase mb-1">Số Đợt Khóa</div>
+                    <div class="fs-2 fw-black" th:text="${totalPeriods}">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="nb-card p-3 text-center">
+                    <div class="text-muted small fw-bold text-uppercase mb-1">Người Dùng</div>
+                    <div class="fs-2 fw-black" th:text="${totalUsers}">0</div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-danger bg-opacity-10 text-danger me-3">
-                            <i class="bi bi-calendar-plus"></i>
+            <div class="col-md-3">
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-calendar-plus fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Đợt Đăng Ký</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Quản lý Đợt đăng ký</h6>
+                        <p class="small mb-4">Tạo đợt mới (KLTN, NCKH, TLCN), mở cổng cho GV/SV nộp bài.</p>
                     </div>
-                    <p class="text-muted small">Tạo đợt mới (KLTN, NCKH, TLCN), thiết lập hạn chót nộp điểm và ngày báo cáo.</p>
-                    <a href="/admin/periods" class="btn btn-sm btn-outline-danger mt-auto">Truy cập</a>
+                    <a href="/admin/periods" class="nb-btn w-100">QUẢN LÝ ĐỢT</a>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-danger bg-opacity-10 text-danger me-3">
-                            <i class="bi bi-people-fill"></i>
+            <div class="col-md-3">
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-people-fill fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Hội Đồng Phản Biện</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Hội đồng Phản biện</h6>
+                        <p class="small mb-4">Thành lập hội đồng (3-5 GV, Chủ tịch, Thư ký) và phân công chấm.</p>
                     </div>
-                    <p class="text-muted small">Thành lập hội đồng (3-5 GV, Chủ tịch, Thư ký) và phân công chấm đề tài.</p>
-                    <a href="/admin/councils" class="btn btn-sm btn-outline-danger mt-auto">Truy cập</a>
+                    <a href="/admin/councils" class="nb-btn w-100">QUẢN LÝ HỘI ĐỒNG</a>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-danger bg-opacity-10 text-danger me-3">
-                            <i class="bi bi-megaphone-fill"></i>
+            <div class="col-md-3">
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-gear fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Tài Khoản Hệ Thống</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Công bố Điểm & Thông báo</h6>
+                        <p class="small mb-4">Quản lý danh sách sinh viên, giảng viên và cán bộ bộ môn.</p>
                     </div>
-                    <p class="text-muted small">Phê duyệt kết quả đánh giá cuối cùng và công bố kết quả cho toàn trường.</p>
-                    <a href="/admin/publish" class="btn btn-sm btn-outline-danger mt-auto">Truy cập</a>
+                    <a href="/admin/users" class="nb-btn w-100">QUẢN TRỊ USERS</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-megaphone-fill fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Công Bố Kết Quả</h6>
+                        </div>
+                        <p class="small mb-4">Phê duyệt và công bố bảng điểm đánh giá cuối cùng toàn trường.</p>
+                    </div>
+                    <a href="/admin/publish" class="nb-btn w-100">CÔNG BỐ ĐIỂM</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 2. PHÂN HỆ TRƯỞNG BỘ MÔN (ROLE_DEPARTMENT_HEAD) -->
-    <div sec:authorize="hasRole('DEPARTMENT_HEAD')" class="mb-4">
-        <h5 class="fw-bold text-warning border-start border-4 border-warning ps-2 mb-3">
-            <i class="bi bi-building-fill me-1"></i> Bảng điều khiển Trưởng bộ môn
+    <div sec:authorize="hasRole('DEPARTMENT_HEAD')" class="mb-5">
+        <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
+            <i class="bi bi-building-fill me-2"></i>PHÂN HỆ TRƯỞNG BỘ MÔN
         </h5>
         <div class="row g-3">
             <div class="col-md-6">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-warning bg-opacity-10 text-warning me-3">
-                            <i class="bi bi-check2-circle"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-check2-circle fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Kiểm duyệt Đề tài</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Kiểm duyệt Đề tài Bộ môn</h6>
+                        <p class="small mb-4">Xem xét nội dung đề tài giảng viên nộp lên, duyệt hoặc yêu cầu chỉnh sửa.</p>
                     </div>
-                    <p class="text-muted small">Xem xét nội dung đề tài giảng viên nộp lên, duyệt hoặc yêu cầu chỉnh sửa.</p>
-                    <a href="/department/topics" class="btn btn-sm btn-outline-warning mt-auto">Xét duyệt</a>
+                    <a href="/department/topics" class="nb-btn w-100">XÉT DUYỆT ĐỀ TÀI</a>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-warning bg-opacity-10 text-warning me-3">
-                            <i class="bi bi-journal-text"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-journal-text fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Danh mục Đề tài</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Danh mục Đề tài của Bộ môn</h6>
+                        <p class="small mb-4">Thống kê danh sách đề tài, số lượng GVHD và số lượng nhóm đã đăng ký.</p>
                     </div>
-                    <p class="text-muted small">Thống kê danh sách đề tài, số lượng GVHD và số lượng nhóm đã đăng ký.</p>
-                    <a href="/department/catalog" class="btn btn-sm btn-outline-warning mt-auto">Xem danh mục</a>
+                    <a href="/department/catalog" class="nb-btn w-100">XEM DANH MỤC</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 3. PHÂN HỆ GIẢNG VIÊN (ROLE_LECTURER) -->
-    <div sec:authorize="hasRole('LECTURER')" class="mb-4">
-        <h5 class="fw-bold text-info border-start border-4 border-info ps-2 mb-3">
-            <i class="bi bi-person-video3 me-1"></i> Bảng điều khiển Giảng viên
+    <div sec:authorize="hasRole('LECTURER')" class="mb-5">
+        <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
+            <i class="bi bi-person-video3 me-2"></i>PHÂN HỆ GIẢNG VIÊN
         </h5>
         <div class="row g-3">
             <div class="col-md-4">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-info bg-opacity-10 text-info me-3">
-                            <i class="bi bi-plus-circle"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-journal-check fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Đề tài của tôi</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Đề xuất Đề tài mới</h6>
+                        <p class="small mb-4">Đề xuất đề tài mới hoặc theo dõi tiến độ xét duyệt từ phía Bộ môn.</p>
                     </div>
-                    <p class="text-muted small">Đăng ký đề tài mới cho đợt hiện tại (chọn bộ môn, 1-2 GV hướng dẫn).</p>
-                    <a href="/lecturer/topics/create" class="btn btn-sm btn-outline-info mt-auto">Đăng ký đề tài</a>
+                    <div class="d-flex gap-2">
+                        <a href="/lecturer/topics" class="nb-btn w-50 text-center">DANH SÁCH</a>
+                        <a href="/lecturer/topics/create" class="nb-btn nb-btn-black w-50 text-center">+ TẠO MỚI</a>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-info bg-opacity-10 text-info me-3">
-                            <i class="bi bi-people"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-people fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Nhóm Hướng dẫn</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Nhóm sinh viên hướng dẫn</h6>
+                        <p class="small mb-4">Theo dõi tiến độ, xem báo cáo do nhóm trưởng nộp và hướng dẫn thực hiện.</p>
                     </div>
-                    <p class="text-muted small">Theo dõi tiến độ, xem báo cáo do nhóm trưởng nộp và hướng dẫn thực hiện.</p>
-                    <a href="/lecturer/groups" class="btn btn-sm btn-outline-info mt-auto">Xem nhóm</a>
+                    <a href="/lecturer/groups" class="nb-btn w-100">XEM NHÓM</a>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-info bg-opacity-10 text-info me-3">
-                            <i class="bi bi-pencil-square"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-pencil-square fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Chấm điểm & Phản biện</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Chấm điểm & Phản biện</h6>
+                        <p class="small mb-4">Nhập điểm phản biện hoặc điểm hội đồng (chỉ các đề tài không hướng dẫn).</p>
                     </div>
-                    <p class="text-muted small">Nhập điểm phản biện hoặc điểm hội đồng (chỉ các đề tài không hướng dẫn).</p>
-                    <a href="/lecturer/evaluations" class="btn btn-sm btn-outline-info mt-auto">Chấm điểm</a>
+                    <a href="/lecturer/evaluations" class="nb-btn w-100">CHẤM ĐIỂM</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 4. PHÂN HỆ SINH VIÊN (ROLE_STUDENT) -->
-    <div sec:authorize="hasRole('STUDENT')" class="mb-4">
-        <h5 class="fw-bold text-success border-start border-4 border-success ps-2 mb-3">
-            <i class="bi bi-backpack me-1"></i> Bảng điều khiển Sinh viên
+    <div sec:authorize="hasRole('STUDENT')" class="mb-5">
+        <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
+            <i class="bi bi-backpack me-2"></i>PHÂN HỆ SINH VIÊN
         </h5>
         <div class="row g-3">
             <div class="col-md-3">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-success bg-opacity-10 text-success me-3">
-                            <i class="bi bi-person-plus"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-plus fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Nhóm Sinh viên</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Nhóm sinh viên</h6>
+                        <p class="small mb-4">Lập nhóm tối đa 3 thành viên, bầu nhóm trưởng trước khi đăng ký đề tài.</p>
                     </div>
-                    <p class="text-muted small">Lập nhóm tối đa 3 thành viên, bầu nhóm trưởng trước khi đăng ký đề tài.</p>
-                    <a href="/student/group" class="btn btn-sm btn-outline-success mt-auto">Quản lý nhóm</a>
+                    <a href="/student/group" class="nb-btn w-100">QUẢN LÝ NHÓM</a>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-success bg-opacity-10 text-success me-3">
-                            <i class="bi bi-journal-bookmark"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-journal-bookmark fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Đăng ký Đề tài</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Đăng ký Đề tài</h6>
+                        <p class="small mb-4">Duyệt danh sách đề tài đã công bố và chọn 1 đề tài cho nhóm.</p>
                     </div>
-                    <p class="text-muted small">Duyệt danh sách đề tài đã công bố và bấm chọn 1 đề tài cho nhóm.</p>
-                    <a href="/student/topics" class="btn btn-sm btn-outline-success mt-auto">Xem đề tài</a>
+                    <a href="/student/topics" class="nb-btn w-100">XEM ĐỀ TÀI</a>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-success bg-opacity-10 text-success me-3">
-                            <i class="bi bi-cloud-arrow-up"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-cloud-arrow-up fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Nộp Báo cáo</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Nộp Báo cáo</h6>
+                        <p class="small mb-4">Chỉ nhóm trưởng nộp báo cáo tiến độ và báo cáo hoàn thành đề tài.</p>
                     </div>
-                    <p class="text-muted small">Chỉ nhóm trưởng nộp báo cáo tiến độ và báo cáo hoàn thành đề tài.</p>
-                    <a href="/student/submissions" class="btn btn-sm btn-outline-success mt-auto">Nộp bài</a>
+                    <a href="/student/submissions" class="nb-btn w-100">NỘP BÀI</a>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card feature-card shadow-sm h-100 p-3">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-box bg-success bg-opacity-10 text-success me-3">
-                            <i class="bi bi-award"></i>
+                <div class="nb-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-award fs-3 me-2"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase">Kết quả & Điểm số</h6>
                         </div>
-                        <h6 class="fw-bold mb-0">Kết quả & Điểm số</h6>
+                        <p class="small mb-4">Tra cứu điểm phản biện, điểm hội đồng và nhận xét sau khi công bố.</p>
                     </div>
-                    <p class="text-muted small">Tra cứu điểm phản biện, điểm hội đồng và nhận xét sau khi công bố.</p>
-                    <a href="/student/results" class="btn btn-sm btn-outline-success mt-auto">Xem điểm</a>
+                    <a href="/student/results" class="nb-btn w-100">XEM ĐIỂM</a>
                 </div>
             </div>
         </div>
