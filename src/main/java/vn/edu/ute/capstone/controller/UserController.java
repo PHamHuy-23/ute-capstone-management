@@ -29,8 +29,18 @@ public class UserController {
     private final RoleRepository roleRepository;
 
     @GetMapping
-    public String listUsers(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
+    public String listUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            org.springframework.security.core.Authentication authentication,
+            Model model
+    ) {
+        String currentUsername = (authentication != null) ? authentication.getName() : null;
+        org.springframework.data.domain.Page<User> userPage = userService.getUsersPaged(currentUsername, page, size);
+
+        model.addAttribute("userPage", userPage);
+        model.addAttribute("users", userPage.getContent());
+        model.addAttribute("currentUsername", currentUsername);
         return "admin/users/list";
     }
 

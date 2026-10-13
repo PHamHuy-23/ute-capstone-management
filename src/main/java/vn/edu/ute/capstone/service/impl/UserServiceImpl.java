@@ -73,6 +73,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<User> getUsersPaged(String currentUsername, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, size, org.springframework.data.domain.Sort.by("id").descending()
+        );
+
+        if (currentUsername == null || currentUsername.isBlank()) {
+            return userRepository.findAll(pageable);
+        }
+
+        User currentAdmin = userRepository.findByUsername(currentUsername).orElse(null);
+        // Nếu Admin thuộc 1 Khoa cụ thể (qua Department -> Faculty) -> Chỉ lấy User thuộc Khoa đó (Faculty Isolation)
+        if (currentAdmin != null && currentAdmin.getDepartment() != null && currentAdmin.getDepartment().getFaculty() != null) {
+            Long facultyId = currentAdmin.getDepartment().getFaculty().getId();
+            log.info("[Faculty Isolation] Admin {} đang quản lý người dùng thuộc Khoa ID: {}", currentUsername, facultyId);
+            return userRepository.findByFacultyId(facultyId, pageable);
+        }
+
+        // Trường hợp Super Admin toàn trường (hoặc không gắn khoa cụ thể)
+        return userRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<User> getLecturersByDepartment(Long departmentId) {
         return userRepository.findAll().stream()
                 .filter(u -> u.getDepartment() != null && u.getDepartment().getId().equals(departmentId))

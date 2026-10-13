@@ -119,6 +119,9 @@
         </table>
     </div>
 
+    <!-- Phân trang danh sách người dùng -->
+    <div th:replace="~{fragments/layout :: pagination(${userPage}, '/admin/users')}"></div>
+
 </div>
 
 </body>

@@ -17,6 +17,8 @@ public interface UserService {
 
     List<User> getAllUsers();
 
+    org.springframework.data.domain.Page<User> getUsersPaged(String currentUsername, int page, int size);
+
     List<User> getLecturersByDepartment(Long departmentId);
 
     User createUser(UserCreateDTO createDTO);
