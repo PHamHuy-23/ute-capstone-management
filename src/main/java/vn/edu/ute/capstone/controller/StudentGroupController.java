@@ -30,6 +30,7 @@ public class StudentGroupController {
     private final StudentGroupService groupService;
     private final UserService userService;
     private final RegistrationPeriodRepository periodRepository;
+    private final vn.edu.ute.capstone.service.TopicService topicService;
 
     @GetMapping("/group")
     public String viewMyGroup(
@@ -169,6 +170,8 @@ public class StudentGroupController {
     @GetMapping("/topics")
     public String browseTopics(
             @RequestParam(name = "periodId", required = false) Long periodId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
@@ -188,7 +191,7 @@ public class StudentGroupController {
             }
         }
 
-        List<Topic> topics = groupService.getAvailableTopicsForStudent(currentPeriodId);
+        org.springframework.data.domain.Page<Topic> topicPage = topicService.getApprovedTopicsForStudentPaged(currentPeriodId, page, size);
 
         StudentGroup studentGroup = null;
         boolean isLeader = false;
@@ -201,7 +204,8 @@ public class StudentGroupController {
             }
         }
 
-        model.addAttribute("topics", topics);
+        model.addAttribute("topicPage", topicPage);
+        model.addAttribute("topics", topicPage.getContent());
         model.addAttribute("selectedPeriodId", currentPeriodId);
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());
         model.addAttribute("studentGroup", studentGroup);

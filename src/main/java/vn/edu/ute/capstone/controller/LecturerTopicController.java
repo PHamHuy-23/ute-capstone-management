@@ -38,13 +38,16 @@ public class LecturerTopicController {
     @GetMapping
     public String myTopics(
             @RequestParam(name = "periodId", required = false) Long periodId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
         User currentLecturer = userService.findByUsername(userDetails.getUsername());
-        List<Topic> topics = topicService.getTopicsForLecturer(currentLecturer.getId(), periodId);
+        org.springframework.data.domain.Page<Topic> topicPage = topicService.getTopicsForLecturerPaged(currentLecturer.getId(), periodId, page, size);
 
-        model.addAttribute("topics", topics);
+        model.addAttribute("topicPage", topicPage);
+        model.addAttribute("topics", topicPage.getContent());
         model.addAttribute("selectedPeriodId", periodId);
         // Chỉ hiển thị các đợt đã công bố hoặc mở cho GV lọc (hoặc tất cả các đợt của chính đề tài mình)
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());

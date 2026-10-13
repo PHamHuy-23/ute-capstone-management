@@ -125,6 +125,9 @@
         </table>
     </div>
 
+    <!-- Phân trang danh sách đề tài -->
+    <div th:replace="~{fragments/layout :: pagination(${topicPage}, ${selectedPeriodId != null ? '/department/topics?periodId=' + selectedPeriodId : '/department/topics'})}"></div>
+
 </div>
 
 <!-- Modal Nhập lý do từ chối (Thuần CSS/JS Neo-Brutalism, không phụ thuộc nặng JS bên ngoài) -->

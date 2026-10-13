@@ -25,4 +25,13 @@ public interface TopicService {
 
     List<Topic> getAllTopics(Long periodId);
 
+    // PHÂN TRANG (PAGINATION)
+    org.springframework.data.domain.Page<Topic> getTopicsForDepartmentPaged(Long departmentId, Long periodId, int page, int size);
+
+    org.springframework.data.domain.Page<Topic> getTopicsForLecturerPaged(Long lecturerId, Long periodId, int page, int size);
+
+    org.springframework.data.domain.Page<Topic> getCatalogTopicsPaged(Long periodId, int page, int size);
+
+    org.springframework.data.domain.Page<Topic> getApprovedTopicsForStudentPaged(Long periodId, int page, int size);
+
 }

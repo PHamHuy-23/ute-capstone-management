@@ -37,25 +37,28 @@ public class DepartmentTopicController {
     @GetMapping("/topics")
     public String listTopicsForDepartment(
             @RequestParam(name = "periodId", required = false) Long periodId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
         User currentUser = userService.findByUsername(userDetails.getUsername());
         boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> "ROLE_ADMIN".equals(r.getName()));
 
-        List<Topic> topics;
+        org.springframework.data.domain.Page<Topic> topicPage;
         if (isAdmin) {
-            topics = topicService.getAllTopics(periodId);
+            topicPage = topicService.getCatalogTopicsPaged(periodId, page, size);
         } else {
             if (currentUser.getDepartment() == null) {
                 model.addAttribute("errorMessage", "Tài khoản của bạn chưa được liên kết với Bộ môn nào.");
-                topics = List.of();
+                topicPage = org.springframework.data.domain.Page.empty();
             } else {
-                topics = topicService.getTopicsForDepartment(currentUser.getDepartment().getId(), periodId);
+                topicPage = topicService.getTopicsForDepartmentPaged(currentUser.getDepartment().getId(), periodId, page, size);
             }
         }
 
-        model.addAttribute("topics", topics);
+        model.addAttribute("topicPage", topicPage);
+        model.addAttribute("topics", topicPage.getContent());
         model.addAttribute("selectedPeriodId", periodId);
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());
         model.addAttribute("isAdmin", isAdmin);
@@ -103,25 +106,28 @@ public class DepartmentTopicController {
     @GetMapping("/catalog")
     public String viewCatalog(
             @RequestParam(name = "periodId", required = false) Long periodId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
         User currentUser = userService.findByUsername(userDetails.getUsername());
         boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> "ROLE_ADMIN".equals(r.getName()));
 
-        List<Topic> topics;
+        org.springframework.data.domain.Page<Topic> topicPage;
         if (isAdmin) {
-            topics = topicService.getAllTopics(periodId);
+            topicPage = topicService.getCatalogTopicsPaged(periodId, page, size);
         } else {
             if (currentUser.getDepartment() == null) {
                 model.addAttribute("errorMessage", "Tài khoản của bạn chưa được liên kết với Bộ môn nào.");
-                topics = List.of();
+                topicPage = org.springframework.data.domain.Page.empty();
             } else {
-                topics = topicService.getTopicsForDepartment(currentUser.getDepartment().getId(), periodId);
+                topicPage = topicService.getTopicsForDepartmentPaged(currentUser.getDepartment().getId(), periodId, page, size);
             }
         }
 
-        model.addAttribute("topics", topics);
+        model.addAttribute("topicPage", topicPage);
+        model.addAttribute("topics", topicPage.getContent());
         model.addAttribute("selectedPeriodId", periodId);
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());
         model.addAttribute("currentUser", currentUser);

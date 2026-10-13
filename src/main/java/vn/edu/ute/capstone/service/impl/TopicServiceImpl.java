@@ -235,6 +235,55 @@ public class TopicServiceImpl implements TopicService {
         return topicRepository.findAll();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Topic> getTopicsForDepartmentPaged(Long departmentId, Long periodId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, size, org.springframework.data.domain.Sort.by("createdAt").descending()
+        );
+        if (periodId != null && periodId > 0) {
+            return topicRepository.findByDepartmentIdAndPeriodId(departmentId, periodId, pageable);
+        }
+        return topicRepository.findByDepartmentId(departmentId, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Topic> getTopicsForLecturerPaged(Long lecturerId, Long periodId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, size, org.springframework.data.domain.Sort.by("createdAt").descending()
+        );
+        if (periodId != null && periodId > 0) {
+            return topicRepository.findByLecturerIdAndPeriodId(lecturerId, periodId, pageable);
+        }
+        return topicRepository.findByLecturerId(lecturerId, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Topic> getCatalogTopicsPaged(Long periodId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, size, org.springframework.data.domain.Sort.by("createdAt").descending()
+        );
+        if (periodId != null && periodId > 0) {
+            return topicRepository.findByPeriodId(periodId, pageable);
+        }
+        return topicRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Topic> getApprovedTopicsForStudentPaged(Long periodId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, size, org.springframework.data.domain.Sort.by("createdAt").descending()
+        );
+        List<TopicStatus> studentVisibleStatuses = List.of(TopicStatus.APPROVED, TopicStatus.ASSIGNED);
+        if (periodId != null && periodId > 0) {
+            return topicRepository.findByPeriodIdAndStatusIn(periodId, studentVisibleStatuses, pageable);
+        }
+        return topicRepository.findByStatusIn(studentVisibleStatuses, pageable);
+    }
+
     private RegistrationPeriod validatePeriodForProposal(Long periodId) {
         RegistrationPeriod period = periodRepository.findById(periodId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đợt đăng ký tương ứng."));

@@ -152,6 +152,9 @@
         </table>
     </div>
 
+    <!-- Phân trang danh mục đề tài sinh viên -->
+    <div th:replace="~{fragments/layout :: pagination(${topicPage}, ${selectedPeriodId != null ? '/student/topics?periodId=' + selectedPeriodId : '/student/topics'})}"></div>
+
 </div>
 
 <script>

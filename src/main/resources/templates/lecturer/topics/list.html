@@ -160,6 +160,9 @@
         </table>
     </div>
 
+    <!-- Phân trang đề tài của tôi -->
+    <div th:replace="~{fragments/layout :: pagination(${topicPage}, ${selectedPeriodId != null ? '/lecturer/topics?periodId=' + selectedPeriodId : '/lecturer/topics'})}"></div>
+
 </div>
 
 <script>

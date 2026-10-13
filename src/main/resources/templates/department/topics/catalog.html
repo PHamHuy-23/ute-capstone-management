@@ -135,6 +135,9 @@
         </table>
     </div>
 
+    <!-- Phân trang danh mục đề tài -->
+    <div th:replace="~{fragments/layout :: pagination(${topicPage}, ${selectedPeriodId != null ? '/department/catalog?periodId=' + selectedPeriodId : '/department/catalog'})}"></div>
+
 </div>
 
 </body>
