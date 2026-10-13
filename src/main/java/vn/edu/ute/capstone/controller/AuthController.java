@@ -27,10 +27,14 @@ public class AuthController {
     public String loginPage(
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "logout", required = false) String logout,
+            @RequestParam(value = "oauth2_error", required = false) String oauth2Error,
             Model model
     ) {
         if (error != null) {
             model.addAttribute("errorMessage", "Tài khoản hoặc mật khẩu không chính xác!");
+        }
+        if (oauth2Error != null) {
+            model.addAttribute("errorMessage", "Đăng nhập Google không thành công. Lưu ý: Chỉ chấp nhận email chính thức do HCMUTE cấp (@student.hcmute.edu.vn hoặc @ute.edu.vn) và đã có trong hệ thống.");
         }
         if (logout != null) {
             model.addAttribute("successMessage", "Đăng xuất thành công!");
