@@ -25,6 +25,8 @@ public class EvaluationServiceImpl implements EvaluationService {
     private final TopicRepository topicRepository;
     private final TopicAdvisorRepository topicAdvisorRepository;
     private final UserRepository userRepository;
+    private final vn.edu.ute.capstone.repository.StudentGroupRepository studentGroupRepository;
+    private final vn.edu.ute.capstone.repository.SubmissionRepository submissionRepository;
 
     @Override
     @Transactional
@@ -227,6 +229,16 @@ public class EvaluationServiceImpl implements EvaluationService {
             if (isAdvisor) {
                 throw new IllegalStateException("Quy chế liêm chính: Giảng viên hướng dẫn không được phép tham gia chấm phản biện hoặc hội đồng cho đề tài của mình.");
             }
+        }
+
+        // Guard 1.1: Đề tài phải có nhóm sinh viên thực hiện và nhóm phải có nộp báo cáo đồ án
+        Optional<StudentGroup> groupOpt = studentGroupRepository.findByTopicId(topic.getId());
+        if (groupOpt.isEmpty()) {
+            throw new IllegalStateException("Đề tài này hiện chưa có nhóm sinh viên nào đăng ký thực hiện, không thể nhập điểm đánh giá.");
+        }
+        long submissionCount = submissionRepository.countByGroupId(groupOpt.get().getId());
+        if (submissionCount == 0) {
+            throw new IllegalStateException("Nhóm sinh viên chưa nộp bất kỳ tài liệu/báo cáo nào cho đề tài này. Quy chế yêu cầu sinh viên phải nộp báo cáo đồ án thì giảng viên mới được phép chấm điểm.");
         }
 
         // Guard 2: Điểm số hợp lệ từ 0.0 đến 10.0

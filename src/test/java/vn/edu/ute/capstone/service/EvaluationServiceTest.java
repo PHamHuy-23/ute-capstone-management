@@ -42,6 +42,12 @@ class EvaluationServiceTest {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private StudentGroupRepository studentGroupRepository;
+
+    @Autowired
+    private SubmissionRepository submissionRepository;
+
     private User admin;
     private User gvhd;
     private User gv1;
@@ -125,6 +131,32 @@ class EvaluationServiceTest {
                 .topic(topic)
                 .lecturer(gvhd)
                 .isPrimary(true)
+                .build());
+
+        Role roleStudent = roleRepository.findByName("ROLE_STUDENT").orElseGet(() ->
+                roleRepository.save(Role.builder().name("ROLE_STUDENT").build()));
+        User student = userRepository.save(User.builder()
+                .username("sv_test")
+                .password("$2a$10$w8uD.30Q4u03X4Q9QY/5yeV89i75o01P1X3X2b/f4M6t5Y/3E7eUu")
+                .fullName("Nguyễn Văn Sinh Viên")
+                .email("sv@ute.edu.vn")
+                .roles(java.util.Set.of(roleStudent))
+                .isActive(true)
+                .build());
+
+        StudentGroup group = studentGroupRepository.save(StudentGroup.builder()
+                .groupCode("GRP-TEST-01")
+                .period(period)
+                .topic(topic)
+                .status(GroupStatus.ACCEPTED)
+                .build());
+
+        submissionRepository.save(Submission.builder()
+                .group(group)
+                .submittedBy(student)
+                .title("Báo cáo tiến độ đồ án")
+                .filePath("uploads/reports/test-report.pdf")
+                .reviewStatus(ReviewStatus.PENDING)
                 .build());
     }
 
@@ -247,5 +279,45 @@ class EvaluationServiceTest {
         Double avgScore = evaluationService.getAverageScore(topic.getId());
         assertNotNull(avgScore);
         assertEquals(8.50, avgScore);
+    }
+
+    @Test
+    @DisplayName("Chặn chấm điểm khi nhóm sinh viên chưa nộp bất kỳ báo cáo nào")
+    void testSubmitEvaluation_FailsWhenNoReportSubmitted() {
+        // Tạo đề tài mới có nhóm sinh viên nhưng CHƯA nộp báo cáo
+        Department dept = departmentRepository.findAll().get(0);
+        Topic newTopic = topicRepository.save(Topic.builder()
+                .code("TOPIC-NO-SUBMIT")
+                .title("Đề tài chưa có báo cáo")
+                .department(dept)
+                .period(period)
+                .status(TopicStatus.ASSIGNED)
+                .build());
+
+        topicAdvisorRepository.save(TopicAdvisor.builder()
+                .id(new TopicAdvisorId(newTopic.getId(), gvhd.getId()))
+                .topic(newTopic)
+                .lecturer(gvhd)
+                .isPrimary(true)
+                .build());
+
+        studentGroupRepository.save(StudentGroup.builder()
+                .groupCode("GRP-NO-SUBMIT")
+                .period(period)
+                .topic(newTopic)
+                .status(GroupStatus.ACCEPTED)
+                .build());
+
+        EvaluationDTO dto = EvaluationDTO.builder()
+                .topicId(newTopic.getId())
+                .score(new BigDecimal("8.5"))
+                .evaluationType(EvaluationType.ADVISOR)
+                .build();
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
+            evaluationService.submitEvaluation(dto, gvhd);
+        });
+
+        assertTrue(ex.getMessage().contains("chưa nộp bất kỳ tài liệu/báo cáo nào"));
     }
 }
