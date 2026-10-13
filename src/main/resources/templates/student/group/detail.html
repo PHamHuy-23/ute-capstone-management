@@ -174,7 +174,9 @@
                                         <form th:if="${!m.isLeader}" th:action="@{'/student/group/' + ${group.id} + '/remove-member/' + ${m.id}}" method="post" class="d-inline m-0"
                                               th:id="'removeMemForm_' + ${m.id}">
                                             <button type="button" class="nb-btn nb-btn-sm text-danger p-1" 
-                                                    th:onclick="'confirmRemoveMember(' + ${m.id} + ', \'' + ${m.student.fullName} + '\')'">
+                                                    th:data-id="${m.id}"
+                                                    th:data-name="${m.student.fullName}"
+                                                    onclick="confirmRemoveMember(this)">
                                                 <i class="bi bi-x-circle-fill"></i>
                                             </button>
                                         </form>
@@ -295,7 +297,9 @@
         }
     }
 
-    async function confirmRemoveMember(memberId, memberName) {
+    async function confirmRemoveMember(btn) {
+        const memberId = btn.getAttribute('data-id');
+        const memberName = btn.getAttribute('data-name');
         const confirmed = await openNbConfirm(
             'Bạn có chắc chắn muốn xóa bạn ' + memberName + ' ra khỏi nhóm?',
             'XÓA THÀNH VIÊN'

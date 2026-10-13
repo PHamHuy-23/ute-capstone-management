@@ -122,7 +122,9 @@
                                 <input type="hidden" name="groupId" th:value="${studentGroup.id}">
                                 <input type="hidden" name="topicId" th:value="${t.id}">
                                 <button type="button" class="nb-btn nb-btn-sm nb-btn-black"
-                                        th:onclick="'confirmRegisterTopic(' + ${t.id} + ', \'' + ${t.title} + '\')'">
+                                        th:data-id="${t.id}"
+                                        th:data-title="${t.title}"
+                                        onclick="confirmRegisterTopic(this)">
                                     <i class="bi bi-check-circle-fill me-1"></i>ĐĂNG KÝ
                                 </button>
                             </form>
@@ -158,7 +160,9 @@
 </div>
 
 <script>
-    async function confirmRegisterTopic(topicId, topicTitle) {
+    async function confirmRegisterTopic(btn) {
+        const topicId = btn.getAttribute('data-id');
+        const topicTitle = btn.getAttribute('data-title');
         const confirmed = await openNbConfirm(
             'Bạn có chắc chắn muốn đăng ký đề tài "' + topicTitle + '" cho nhóm của mình?',
             'ĐĂNG KÝ ĐỀ TÀI'

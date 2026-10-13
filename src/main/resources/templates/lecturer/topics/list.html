@@ -146,7 +146,9 @@
                             <form th:action="@{'/lecturer/topics/delete/' + ${t.id}}" method="post" class="d-inline m-0"
                                   th:id="'deleteTopicForm_' + ${t.id}">
                                 <button type="button" class="nb-btn nb-btn-sm text-danger" title="Xóa"
-                                        th:onclick="'confirmDeleteTopic(' + ${t.id} + ', \'' + ${t.title} + '\')'">
+                                        th:data-id="${t.id}"
+                                        th:data-title="${t.title}"
+                                        onclick="confirmDeleteTopic(this)">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </form>
@@ -175,7 +177,9 @@
         }
     }
 
-    async function confirmDeleteTopic(topicId, topicTitle) {
+    async function confirmDeleteTopic(btn) {
+        const topicId = btn.getAttribute('data-id');
+        const topicTitle = btn.getAttribute('data-title');
         const confirmed = await openNbConfirm(
             'Bạn có chắc chắn muốn xóa đề tài "' + topicTitle + '" không? Hành động này không thể hoàn tác.',
             'XÓA ĐỀ TÀI'

@@ -90,7 +90,9 @@
                         <form th:action="@{'/admin/councils/delete/' + ${c.id}}" method="post" class="d-inline m-0"
                               th:id="'deleteCouncilForm_' + ${c.id}">
                             <button type="button" class="nb-btn nb-btn-sm text-danger" title="Giải tán"
-                                    th:onclick="'confirmDeleteCouncil(' + ${c.id} + ', \'' + ${c.name} + '\')'">
+                                    th:data-id="${c.id}"
+                                    th:data-name="${c.name}"
+                                    onclick="confirmDeleteCouncil(this)">
                                 <i class="bi bi-trash-fill"></i>
                             </button>
                         </form>
@@ -100,10 +102,15 @@
         </table>
     </div>
 
+    <!-- Phân trang Hội đồng -->
+    <div th:replace="~{fragments/layout :: pagination(${councilPage}, ${selectedPeriodId != null ? '/admin/councils?periodId=' + selectedPeriodId : '/admin/councils'})}"></div>
+
 </div>
 
 <script>
-    async function confirmDeleteCouncil(councilId, councilName) {
+    async function confirmDeleteCouncil(btn) {
+        const councilId = btn.getAttribute('data-id');
+        const councilName = btn.getAttribute('data-name');
         const confirmed = await openNbConfirm(
             'Bạn có chắc chắn muốn giải tán hội đồng "' + councilName + '" không? Hành động này không thể hoàn tác.',
             'GIẢI TÁN HỘI ĐỒNG'
