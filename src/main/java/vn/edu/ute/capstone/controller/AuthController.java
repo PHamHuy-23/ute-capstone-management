@@ -62,4 +62,13 @@ public class AuthController {
         return "redirect:/dashboard";
     }
 
+    @GetMapping("/access-denied")
+    public String accessDenied(Authentication authentication, Model model) {
+        if (authentication != null) {
+            model.addAttribute("username", authentication.getName());
+            model.addAttribute("roles", authentication.getAuthorities());
+        }
+        return "auth/access-denied";
+    }
+
 }

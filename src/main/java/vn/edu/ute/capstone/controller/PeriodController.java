@@ -17,6 +17,7 @@ import vn.edu.ute.capstone.dto.RegistrationPeriodDTO;
 import vn.edu.ute.capstone.entity.PeriodStatus;
 import vn.edu.ute.capstone.entity.PeriodType;
 import vn.edu.ute.capstone.entity.RegistrationPeriod;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.service.ExcelService;
 import vn.edu.ute.capstone.service.RegistrationPeriodService;
 
@@ -25,6 +26,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/periods")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class PeriodController {
 

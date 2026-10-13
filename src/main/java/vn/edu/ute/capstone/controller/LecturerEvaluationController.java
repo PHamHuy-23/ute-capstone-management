@@ -13,6 +13,7 @@ import vn.edu.ute.capstone.dto.EvaluationDTO;
 import vn.edu.ute.capstone.entity.*;
 import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
 import vn.edu.ute.capstone.repository.TopicRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.service.EvaluationService;
 import vn.edu.ute.capstone.service.UserService;
 
@@ -21,6 +22,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping("/lecturer/evaluations")
+@PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
 @RequiredArgsConstructor
 public class LecturerEvaluationController {
 

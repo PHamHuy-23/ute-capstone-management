@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.ute.capstone.dto.CreateGroupDTO;
 import vn.edu.ute.capstone.entity.*;
 import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.service.StudentGroupService;
 import vn.edu.ute.capstone.service.UserService;
 
@@ -22,6 +23,7 @@ import java.util.Optional;
 @Slf4j
 @Controller
 @RequestMapping("/student")
+@PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
 @RequiredArgsConstructor
 public class StudentGroupController {
 

@@ -299,5 +299,53 @@
 
 </div>
 
+<!-- Neo-Brutalism Top Loading Bar -->
+<div id="nbTopLoader"></div>
+
+<script>
+    function showNbLoader() {
+        const bar = document.getElementById('nbTopLoader');
+        if (bar) {
+            bar.style.width = '40%';
+            bar.style.opacity = '1';
+            setTimeout(() => { bar.style.width = '80%'; }, 150);
+        }
+    }
+
+    function hideNbLoader() {
+        const bar = document.getElementById('nbTopLoader');
+        if (bar) {
+            bar.style.width = '100%';
+            setTimeout(() => {
+                bar.style.opacity = '0';
+                setTimeout(() => { bar.style.width = '0%'; }, 250);
+            }, 200);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        hideNbLoader();
+        document.querySelectorAll('a[href]').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:') && !link.target) {
+                link.addEventListener('click', (e) => {
+                    if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
+                        showNbLoader();
+                    }
+                });
+            }
+        });
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', () => {
+                showNbLoader();
+            });
+        });
+    });
+
+    window.addEventListener('pageshow', () => {
+        hideNbLoader();
+    });
+</script>
+
 </body>
 </html>

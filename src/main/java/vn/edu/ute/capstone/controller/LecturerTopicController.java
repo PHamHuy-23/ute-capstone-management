@@ -16,6 +16,7 @@ import vn.edu.ute.capstone.entity.Topic;
 import vn.edu.ute.capstone.entity.User;
 import vn.edu.ute.capstone.repository.DepartmentRepository;
 import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.service.TopicService;
 import vn.edu.ute.capstone.service.UserService;
 
@@ -24,6 +25,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping("/lecturer/topics")
+@PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
 @RequiredArgsConstructor
 public class LecturerTopicController {
 

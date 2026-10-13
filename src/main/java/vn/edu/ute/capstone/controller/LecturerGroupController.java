@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.ute.capstone.entity.*;
 import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.repository.StudentGroupRepository;
 import vn.edu.ute.capstone.service.SubmissionService;
 import vn.edu.ute.capstone.service.UserService;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/lecturer/groups")
+@PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
 @RequiredArgsConstructor
 public class LecturerGroupController {
 

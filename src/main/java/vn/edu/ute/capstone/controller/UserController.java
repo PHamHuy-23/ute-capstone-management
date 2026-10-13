@@ -12,6 +12,7 @@ import vn.edu.ute.capstone.dto.UserUpdateDTO;
 import vn.edu.ute.capstone.entity.Role;
 import vn.edu.ute.capstone.entity.User;
 import vn.edu.ute.capstone.repository.DepartmentRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.repository.RoleRepository;
 import vn.edu.ute.capstone.service.UserService;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/users")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class UserController {
 

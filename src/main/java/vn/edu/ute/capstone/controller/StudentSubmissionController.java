@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.ute.capstone.dto.SubmissionDTO;
 import vn.edu.ute.capstone.entity.*;
 import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.service.StudentGroupService;
 import vn.edu.ute.capstone.service.SubmissionService;
 import vn.edu.ute.capstone.service.UserService;
@@ -27,6 +28,7 @@ import java.util.Optional;
 @Slf4j
 @Controller
 @RequestMapping("/student/submissions")
+@PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
 @RequiredArgsConstructor
 public class StudentSubmissionController {
 

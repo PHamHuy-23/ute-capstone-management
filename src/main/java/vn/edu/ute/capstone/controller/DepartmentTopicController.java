@@ -15,6 +15,7 @@ import vn.edu.ute.capstone.entity.TopicStatus;
 import vn.edu.ute.capstone.entity.User;
 import vn.edu.ute.capstone.repository.DepartmentRepository;
 import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.edu.ute.capstone.service.TopicService;
 import vn.edu.ute.capstone.service.UserService;
 
@@ -23,6 +24,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping("/department")
+@PreAuthorize("hasAnyRole('DEPARTMENT_HEAD', 'ADMIN')")
 @RequiredArgsConstructor
 public class DepartmentTopicController {
 

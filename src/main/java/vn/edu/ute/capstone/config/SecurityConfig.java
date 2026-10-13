@@ -24,7 +24,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 // Cho phép truy cập file tĩnh và trang login
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/access-denied").permitAll()
                 // Phân quyền theo vai trò
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/department/**").hasAnyRole("DEPARTMENT_HEAD", "ADMIN")
@@ -46,6 +46,9 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
+            )
+            .exceptionHandling(ex -> ex
+                .accessDeniedPage("/access-denied")
             );
 
         return http.build();

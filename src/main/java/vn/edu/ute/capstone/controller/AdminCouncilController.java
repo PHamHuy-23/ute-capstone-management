@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.ute.capstone.dto.CouncilCreateDTO;
 import vn.edu.ute.capstone.entity.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import vn.edu.ute.capstone.entity.Council;
+import vn.edu.ute.capstone.entity.CouncilRole;
+import vn.edu.ute.capstone.entity.Topic;
+import vn.edu.ute.capstone.entity.User;
 import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
 import vn.edu.ute.capstone.repository.TopicRepository;
 import vn.edu.ute.capstone.service.EvaluationService;
@@ -22,6 +27,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping("/admin/councils")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class AdminCouncilController {
 
