@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.ute.capstone.aspect.AuditLog;
 import vn.edu.ute.capstone.dto.CouncilCreateDTO;
 import vn.edu.ute.capstone.dto.EvaluationDTO;
 import vn.edu.ute.capstone.entity.*;
@@ -27,6 +28,7 @@ public class EvaluationServiceImpl implements EvaluationService {
 
     @Override
     @Transactional
+    @AuditLog(action = "CREATE_COUNCIL", description = "Thành lập hội đồng phản biện mới")
     public Council createCouncil(CouncilCreateDTO dto, User admin) {
         log.info("Creating council '{}' for period {}", dto.getName(), dto.getPeriodId());
 
@@ -132,6 +134,7 @@ public class EvaluationServiceImpl implements EvaluationService {
 
     @Override
     @Transactional
+    @AuditLog(action = "SUBMIT_EVALUATION", description = "Nhập điểm và nhận xét chuyên môn")
     public Evaluation submitEvaluation(EvaluationDTO dto, User evaluator) {
         log.info("Lecturer {} is submitting score {} for topic {} as {}", evaluator.getUsername(), dto.getScore(), dto.getTopicId(), dto.getEvaluationType());
 

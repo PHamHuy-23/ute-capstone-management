@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.ute.capstone.aspect.AuditLog;
 import vn.edu.ute.capstone.dto.TopicApprovalDTO;
 import vn.edu.ute.capstone.dto.TopicProposalDTO;
 import vn.edu.ute.capstone.entity.*;
@@ -31,6 +32,7 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     @Transactional
+    @AuditLog(action = "PROPOSE_TOPIC", description = "Đề xuất đề tài mới từ Giảng viên")
     public Topic createTopic(TopicProposalDTO dto, User currentLecturer) {
         log.info("Lecturer {} is proposing new topic with code: {}", currentLecturer.getUsername(), dto.getCode());
 
@@ -165,6 +167,7 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     @Transactional
+    @AuditLog(action = "APPROVE_OR_REJECT_TOPIC", description = "Xét duyệt hoặc từ chối đề tài")
     public Topic approveOrRejectTopic(TopicApprovalDTO dto, User approver) {
         Topic topic = findById(dto.getTopicId());
 

@@ -40,6 +40,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Spring AOP (Aspect-Oriented Programming for Audit Logging & Performance Monitoring) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- 3. Apache POI (Xử lý Excel Import / Export) -->
         <dependency>
             <groupId>org.apache.poi</groupId>

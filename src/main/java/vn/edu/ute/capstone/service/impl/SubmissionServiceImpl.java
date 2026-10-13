@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import vn.edu.ute.capstone.aspect.AuditLog;
 import vn.edu.ute.capstone.config.CloudflareR2Config;
 import vn.edu.ute.capstone.dto.SubmissionDTO;
 import vn.edu.ute.capstone.entity.*;
@@ -45,6 +46,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     @Transactional
+    @AuditLog(action = "SUBMIT_REPORT", description = "Nhóm trưởng nộp tài liệu báo cáo tiến độ/hoàn thành")
     public Submission submitReport(SubmissionDTO dto, MultipartFile file, User currentLeader) {
         log.info("Student {} is submitting report for group {}", currentLeader.getUsername(), dto.getGroupId());
 
