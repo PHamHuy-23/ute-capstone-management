@@ -35,15 +35,27 @@
     </div>
 </nav>
 
-<!-- Component Flash Messages chung -->
-<div th:fragment="alerts">
+<!-- Component Flash Messages / Notifications chung (Neo-Brutalism Design Standard) -->
+<div th:fragment="alerts" id="nbGlobalAlerts">
     <div th:if="${successMessage}" class="nb-alert nb-alert-success d-flex align-items-center mb-3">
         <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-        <span th:text="${successMessage}">Thao tác thành công!</span>
+        <span class="flex-grow-1" th:text="${successMessage}">Thao tác thành công!</span>
+        <button type="button" class="nb-alert-close" onclick="this.parentElement.remove()" title="Đóng">&times;</button>
     </div>
     <div th:if="${errorMessage}" class="nb-alert nb-alert-danger d-flex align-items-center mb-3">
         <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-        <span th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+        <span class="flex-grow-1" th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+        <button type="button" class="nb-alert-close" onclick="this.parentElement.remove()" title="Đóng">&times;</button>
+    </div>
+    <div th:if="${warningMessage}" class="nb-alert nb-alert-warning d-flex align-items-center mb-3">
+        <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+        <span class="flex-grow-1" th:text="${warningMessage}">Cảnh báo!</span>
+        <button type="button" class="nb-alert-close" onclick="this.parentElement.remove()" title="Đóng">&times;</button>
+    </div>
+    <div th:if="${infoMessage}" class="nb-alert nb-alert-info d-flex align-items-center mb-3">
+        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+        <span class="flex-grow-1" th:text="${infoMessage}">Thông tin!</span>
+        <button type="button" class="nb-alert-close" onclick="this.parentElement.remove()" title="Đóng">&times;</button>
     </div>
 </div>
 

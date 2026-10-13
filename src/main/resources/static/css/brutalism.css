@@ -75,8 +75,9 @@ body {
     font-size: 1.3rem;
 }
 
-/* 4. CARDS & PANELS (nb-card) */
-.nb-card {
+/* 4. CARDS & PANELS (nb-card, nb-panel) */
+.nb-card,
+.nb-panel {
     background-color: var(--color-surface);
     border: var(--border-solid);
     box-shadow: var(--shadow-md);
@@ -86,13 +87,24 @@ body {
     transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.nb-card-hover:hover {
+.nb-card-hover:hover,
+.nb-panel-hover:hover {
     transform: translate(-2px, -2px);
     box-shadow: var(--shadow-lg);
 }
 
-.nb-card-flat {
+.nb-card-flat,
+.nb-panel-flat {
     box-shadow: none !important;
+}
+
+.nb-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: var(--border-solid);
+    padding-bottom: 12px;
+    margin-bottom: 18px;
 }
 
 /* 5. BUTTON SYSTEM (nb-btn) */
@@ -158,6 +170,42 @@ body {
     color: var(--color-text) !important;
     border: var(--border-solid);
     box-shadow: none;
+}
+
+/* Style D: Nút hành động Nguy hiểm / Cảnh báo (Danger / Red Accent) */
+.nb-btn-danger {
+    background-color: var(--color-accent-red) !important;
+    color: #991b1b !important;
+    border: var(--border-solid) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.nb-btn-danger:hover {
+    background-color: #fecaca !important;
+    color: #7f1d1d !important;
+}
+
+.nb-btn-danger:active {
+    transform: var(--press-offset);
+    box-shadow: var(--shadow-pressed) !important;
+}
+
+/* Style E: Nút hành động Thành công (Success / Green Accent) */
+.nb-btn-success {
+    background-color: var(--color-accent-green) !important;
+    color: #166534 !important;
+    border: var(--border-solid) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.nb-btn-success:hover {
+    background-color: #bbf7d0 !important;
+    color: #14532d !important;
+}
+
+.nb-btn-success:active {
+    transform: var(--press-offset);
+    box-shadow: var(--shadow-pressed) !important;
 }
 
 .nb-btn-outline:hover {
@@ -352,6 +400,29 @@ body {
 .nb-alert-success {
     border-left: 8px solid #16a34a;
     background-color: #f7fee7;
+}
+
+.nb-alert-info {
+    border-left: 8px solid #0284c7;
+    background-color: #f0f9ff;
+}
+
+.nb-alert-close {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 0 4px;
+    margin-left: auto;
+    opacity: 0.7;
+    transition: opacity 0.1s ease;
+}
+
+.nb-alert-close:hover {
+    opacity: 1;
 }
 
 /* 10. TYPOGRAPHY & UTILITIES */

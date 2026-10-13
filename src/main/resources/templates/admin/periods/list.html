@@ -120,8 +120,11 @@
                             </a>
                             <!-- Nút xóa (An toàn: Chặn xóa nếu đã có đề tài) -->
                             <form th:action="@{/admin/periods/delete/{id}(id=${p.id})}" method="post" class="d-inline m-0"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa đợt đăng ký này không? (Lưu ý: Không thể xóa nếu đã có đề tài)');">
-                                <button type="submit" class="nb-btn nb-btn-sm text-danger" title="Xóa đợt">
+                                  th:id="'deletePeriodForm_' + ${p.id}">
+                                <button type="button" class="nb-btn nb-btn-sm text-danger" title="Xóa đợt"
+                                        th:data-id="${p.id}"
+                                        th:data-name="${p.name}"
+                                        onclick="confirmDeletePeriod(this)">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </form>
@@ -146,7 +149,20 @@
             box.style.display = 'none';
         }
     }
+
+    async function confirmDeletePeriod(btn) {
+        const periodId = btn.getAttribute('data-id');
+        const periodName = btn.getAttribute('data-name');
+        const confirmed = await openNbConfirm(
+            'Bạn có chắc chắn muốn xóa đợt đăng ký "' + periodName + '" không? (Lưu ý: Không thể xóa nếu đã có đề tài).',
+            'XÓA ĐỢT ĐĂNG KÝ'
+        );
+        if (confirmed) {
+            document.getElementById('deletePeriodForm_' + periodId).submit();
+        }
+    }
 </script>
 
+<div th:replace="~{fragments/layout :: footer}"></div>
 </body>
 </html>
