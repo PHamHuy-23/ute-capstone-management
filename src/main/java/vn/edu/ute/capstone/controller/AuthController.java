@@ -74,7 +74,7 @@ public class AuthController {
             java.util.List<Long> statusCounts = new java.util.ArrayList<>();
             for (Object[] row : statusStats) {
                 vn.edu.ute.capstone.entity.TopicStatus st = (vn.edu.ute.capstone.entity.TopicStatus) row[0];
-                statusLabels.add(st != null ? st.getDescription() : "Khác");
+                statusLabels.add(st != null ? st.getDisplayName() : "Khác");
                 statusCounts.add(((Number) row[1]).longValue());
             }
             model.addAttribute("statusChartLabels", statusLabels);
