@@ -144,8 +144,8 @@ public class EvaluationServiceImpl implements EvaluationService {
         council.setPeriod(period);
 
         // Kiểm tra xung đột lợi ích đối với các đề tài phân công
-        if (dto.getTopicIds() != null && !dto.getTopicIds().isEmpty()) {
-            List<Topic> topics = topicRepository.findAllById(dto.getTopicIds());
+        if (dto.getAssignedTopicIds() != null && !dto.getAssignedTopicIds().isEmpty()) {
+            List<Topic> topics = topicRepository.findAllById(dto.getAssignedTopicIds());
             for (Topic t : topics) {
                 for (TopicAdvisor adv : t.getAdvisors()) {
                     if (uniqueLecturerIds.contains(adv.getLecturer().getId())) {

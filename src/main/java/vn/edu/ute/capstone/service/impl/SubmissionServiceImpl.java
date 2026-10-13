@@ -210,6 +210,14 @@ public class SubmissionServiceImpl implements SubmissionService {
             return;
         }
 
+        // Thành viên trong Hội đồng chấm đề tài này (được phép xem đồ án để chấm điểm)
+        if (group.getTopic() != null) {
+            boolean isCouncilMember = group.getTopic().getCouncils().stream()
+                    .anyMatch(c -> c.getMembers().stream()
+                            .anyMatch(m -> m.getLecturer().getId().equals(currentUser.getId())));
+            if (isCouncilMember) return;
+        }
+
         throw new IllegalStateException("Bạn không có quyền xem hoặc tải file báo cáo của nhóm này.");
     }
 

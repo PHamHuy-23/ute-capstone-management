@@ -31,9 +31,15 @@ public class LecturerEvaluationController {
     private final UserService userService;
     private final RegistrationPeriodRepository periodRepository;
 
+    private final vn.edu.ute.capstone.repository.StudentGroupRepository groupRepository;
+    private final vn.edu.ute.capstone.repository.SubmissionRepository submissionRepository;
+
     @GetMapping
     public String myEvaluationDashboard(
             @RequestParam(name = "periodId", required = false) Long periodId,
+            @RequestParam(name = "topicId", required = false) Long targetTopicId,
+            @RequestParam(name = "councilId", required = false) Long targetCouncilId,
+            @RequestParam(name = "type", required = false) EvaluationType targetType,
             @AuthenticationPrincipal UserDetails userDetails,
             Model model
     ) {
@@ -66,15 +72,53 @@ public class LecturerEvaluationController {
         // 5. Lịch sử các điểm GV đã chấm
         List<Evaluation> myEvaluations = evaluationService.getEvaluationsByEvaluator(lecturer.getId());
 
+        // 6. Bản đồ điểm đã chấm: key = "TOPIC_ID" + "_" + "TYPE", value = Evaluation
+        java.util.Map<String, Evaluation> evalMap = new java.util.HashMap<>();
+        for (Evaluation e : myEvaluations) {
+            evalMap.put(e.getTopic().getId() + "_" + e.getEvaluationType().name(), e);
+        }
+
+        // 7. Bản đồ báo cáo đồ án nộp mới nhất của từng đề tài: key = TOPIC_ID, value = Submission
+        java.util.Map<Long, Submission> latestSubmissionMap = new java.util.HashMap<>();
+        for (StudentGroup g : groupRepository.findAll()) {
+            if (g.getTopic() != null) {
+                List<Submission> subs = submissionRepository.findByGroupIdOrderBySubmittedAtDesc(g.getId());
+                if (!subs.isEmpty()) {
+                    latestSubmissionMap.put(g.getTopic().getId(), subs.get(0));
+                }
+            }
+        }
+
+        // 8. Bản đồ vai trò trong hội đồng: key = COUNCIL_ID, value = CouncilRole
+        java.util.Map<Long, CouncilRole> councilRoleMap = new java.util.HashMap<>();
+        for (Council c : myCouncils) {
+            c.getMembers().stream()
+                    .filter(m -> m.getLecturer().getId().equals(lecturer.getId()))
+                    .findFirst()
+                    .ifPresent(m -> councilRoleMap.put(c.getId(), m.getRoleInCouncil()));
+        }
+
+        // Tạo form mặc định nếu có target params truyền vào từ nút "Chấm Điểm Ngay"
+        EvaluationDTO form = new EvaluationDTO();
+        if (targetTopicId != null) form.setTopicId(targetTopicId);
+        if (targetCouncilId != null) form.setCouncilId(targetCouncilId);
+        if (targetType != null) form.setEvaluationType(targetType);
+
         model.addAttribute("councils", myCouncils);
+        model.addAttribute("councilRoleMap", councilRoleMap);
         model.addAttribute("guidedTopics", guidedTopics);
         model.addAttribute("councilTopics", councilTopics);
         model.addAttribute("reviewerTopics", reviewerTopics);
         model.addAttribute("myEvaluations", myEvaluations);
+        model.addAttribute("evalMap", evalMap);
+        model.addAttribute("latestSubmissionMap", latestSubmissionMap);
         model.addAttribute("selectedPeriodId", periodId);
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());
-        model.addAttribute("evaluationForm", new EvaluationDTO());
+        model.addAttribute("evaluationForm", form);
         model.addAttribute("evaluationTypes", EvaluationType.values());
+        model.addAttribute("targetTopicId", targetTopicId);
+        model.addAttribute("targetCouncilId", targetCouncilId);
+        model.addAttribute("targetType", targetType != null ? targetType.name() : "");
 
         return "lecturer/evaluations/list";
     }

@@ -71,148 +71,254 @@
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- Cột trái: Form nhập điểm thông minh -->
-        <div class="col-lg-5">
-            <div class="nb-card">
-                <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
-                    <i class="bi bi-pencil-fill me-2"></i>NHẬP ĐIỂM ĐÁNH GIÁ
+    <!-- LỊCH BẢO VỆ & NHIỆM VỤ ĐƯỢC PHÂN CÔNG (CLEAR ROLE & ASSIGNMENT BREAKDOWN) -->
+    <div class="nb-card mb-4">
+        <div class="d-flex justify-content-between align-items-center border-bottom border-3 border-dark pb-3 mb-3">
+            <div>
+                <h5 class="fw-bold text-uppercase mb-0">
+                    <i class="bi bi-calendar2-check-fill me-2"></i>LỊCH BẢO VỆ & DANH SÁCH NHIỆM VỤ CHẤM THI CỦA BẠN
                 </h5>
-
-                <form th:action="@{/lecturer/evaluations/submit}" method="post" id="evalForm">
-                    
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">1. Chọn vai trò & loại điểm <span class="text-danger">*</span></label>
-                        <select name="evaluationType" id="evaluationTypeSelect" class="nb-input" required onchange="onTypeChanged()">
-                            <option value="">-- Chọn loại điểm --</option>
-                            <option th:each="et : ${evaluationTypes}" th:value="${et.name()}" th:text="${et.displayName}"></option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">2. Chọn Đề tài tương ứng <span class="text-danger">*</span></label>
-                        <select name="topicId" id="topicSelect" class="nb-input" required>
-                            <option value="">-- Vui lòng chọn loại điểm trước --</option>
-                        </select>
-                        <div class="form-text small" id="topicHelpText">
-                            Hệ thống sẽ lọc đúng danh sách đề tài bạn có thẩm quyền chấm.
-                        </div>
-                    </div>
-
-                    <div class="mb-3" id="councilGroup" style="display: none;">
-                        <label class="form-label small fw-bold text-uppercase">3. Hội đồng phân công <span class="text-danger">*</span></label>
-                        <select name="councilId" id="councilSelect" class="nb-input">
-                            <option value="">-- Chọn Hội đồng bạn tham gia --</option>
-                            <option th:each="c : ${councils}" th:value="${c.id}" th:text="${c.name}"></option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Điểm số (Thang 10.0) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.05" min="0" max="10" name="score" class="nb-input" placeholder="VD: 8.5" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-uppercase">Nhận xét chuyên môn & Câu hỏi</label>
-                        <textarea name="comments" class="nb-input" rows="3" placeholder="Nhận xét ưu điểm, khuyết điểm hoặc câu hỏi chất vấn sinh viên..."></textarea>
-                    </div>
-
-                    <button type="submit" class="nb-btn nb-btn-black w-100">
-                        <i class="bi bi-check-circle-fill me-1"></i> XÁC NHẬN LƯU ĐIỂM
-                    </button>
-                </form>
+                <span class="small text-muted">Lãnh đạo đã phân công vai trò, địa điểm và đề tài. Bạn chỉ cần click <strong>"CHẤM ĐIỂM NGAY"</strong> hoặc <strong>"XEM BÁO CÁO"</strong>.</span>
+            </div>
+            <div>
+                <span class="nb-badge nb-badge-black" th:text="'HỘI ĐỒNG THAM GIA: ' + ${#lists.size(councils)}">HỘI ĐỒNG: 0</span>
             </div>
         </div>
 
-        <!-- Cột phải: Danh sách các đề tài & hội đồng phân công -->
-        <div class="col-lg-7">
+        <!-- 1. PHÂN CÔNG HỘI ĐỒNG (BẢO VỆ & ĐIỂM HỘI ĐỒNG) -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-uppercase text-dark mb-2">
+                <i class="bi bi-award-fill me-1"></i>1. NHIỆM VỤ THÀNH VIÊN HỘI ĐỒNG CHẤM BẢO VỆ (COUNCIL)
+            </h6>
             
-            <!-- Danh sách Hội đồng tham gia -->
-            <div class="nb-card mb-4">
-                <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
-                    <i class="bi bi-people-fill me-2"></i>HỘI ĐỒNG BẠN THAM GIA (<span th:text="${#lists.size(councils)}">0</span>)
-                </h5>
-
-                <div th:if="${#lists.isEmpty(councils)}" class="text-center py-4 text-muted fw-bold">
-                    <i class="bi bi-inbox fs-3 d-block mb-1"></i>
-                    Bạn hiện chưa được xếp vào hội đồng nào trong đợt này.
-                </div>
-
-                <div class="nb-table-container" th:if="${!#lists.isEmpty(councils)}">
-                    <table class="nb-table">
-                        <thead>
-                            <tr>
-                                <th>TÊN HỘI ĐỒNG</th>
-                                <th>NGÀY BẢO VỆ</th>
-                                <th>ĐỊA ĐIỂM</th>
-                                <th>ĐỀ TÀI PHÂN CÔNG</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="c : ${councils}">
-                                <td><strong th:text="${c.name}">Hội đồng 01</strong></td>
-                                <td>
-                                    <span class="small" th:if="${c.defenseDate != null}" th:text="${#temporals.format(c.defenseDate, 'dd/MM/yyyy HH:mm')}">15/10/2026</span>
-                                    <span class="small text-muted" th:if="${c.defenseDate == null}">Chưa xếp</span>
-                                </td>
-                                <td><span class="small" th:text="${c.location}">Phòng A1-201</span></td>
-                                <td>
-                                    <div th:each="t : ${c.assignedTopics}" class="small">
-                                        <span class="nb-badge nb-badge-black py-0 px-1" th:text="${t.code}">DT01</span>
-                                        <span th:text="${t.title}">Tên</span>
-                                    </div>
-                                    <span th:if="${#sets.isEmpty(c.assignedTopics)}" class="text-muted small">Chưa gán đề tài</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div th:if="${#lists.isEmpty(councils)}" class="nb-alert nb-alert-light mb-3">
+                <i class="bi bi-info-circle me-1"></i>Bạn hiện chưa được phân công tham gia hội đồng chấm thi nào trong đợt này.
             </div>
 
-            <!-- Bảng Lịch sử các điểm bạn đã chấm -->
-            <div class="nb-card">
-                <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
-                    <i class="bi bi-clock-history me-2"></i>LỊCH SỬ ĐIỂM BẠN ĐÃ CHẤM (<span th:text="${#lists.size(myEvaluations)}">0</span>)
-                </h5>
-
-                <div th:if="${#lists.isEmpty(myEvaluations)}" class="text-center py-4 text-muted fw-bold">
-                    <i class="bi bi-clipboard2-check fs-3 d-block mb-1"></i>
-                    Bạn chưa nhập điểm cho đề tài nào.
+            <div th:each="c : ${councils}" class="nb-card mb-3 p-3 bg-light" style="border-left: 8px solid #000;">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2 pb-2 border-bottom border-2 border-dark">
+                    <div>
+                        <span class="fs-6 fw-bold text-uppercase" th:text="${c.name}">HỘI ĐỒNG KLTN SỐ 01</span>
+                        <span class="nb-badge nb-badge-black ms-2" 
+                              th:if="${councilRoleMap.get(c.id) != null}" 
+                              th:text="'VAI TRÒ: ' + ${councilRoleMap.get(c.id).displayName}">VAI TRÒ: ỦY VIÊN</span>
+                    </div>
+                    <div class="small fw-bold">
+                        <span class="me-3"><i class="bi bi-calendar3 me-1"></i>Thời gian: <span th:text="${c.defenseDate != null ? #temporals.format(c.defenseDate, 'dd/MM/yyyy HH:mm') : 'Chưa xếp lịch'}">15/10/2026</span></span>
+                        <span><i class="bi bi-geo-alt-fill me-1"></i>Địa điểm: <span th:text="${c.location != null ? c.location : 'Chưa xếp phòng'}">Phòng A1-201</span></span>
+                    </div>
                 </div>
 
-                <div class="nb-table-container" th:if="${!#lists.isEmpty(myEvaluations)}">
-                    <table class="nb-table">
+                <div class="table-responsive">
+                    <table class="nb-table bg-white">
                         <thead>
                             <tr>
-                                <th>ĐỀ TÀI</th>
-                                <th style="width: 140px;">LOẠI ĐIỂM</th>
-                                <th style="width: 90px;" class="text-center">ĐIỂM</th>
-                                <th>NHẬN XÉT</th>
+                                <th style="width: 120px;">MÃ ĐỀ TÀI</th>
+                                <th>TÊN ĐỀ TÀI PHÂN CÔNG CHẤM</th>
+                                <th style="width: 160px;">BÁO CÁO CỦA SV</th>
+                                <th style="width: 150px;" class="text-center">ĐIỂM CỦA BẠN</th>
+                                <th style="width: 180px;" class="text-center">THAO TÁC</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="e : ${myEvaluations}">
+                            <tr th:if="${#sets.isEmpty(c.assignedTopics)}">
+                                <td colspan="5" class="text-center py-3 text-muted">Hội đồng này chưa được phân công đề tài nào.</td>
+                            </tr>
+                            <tr th:each="t : ${c.assignedTopics}">
+                                <td><strong th:text="${t.code}">DT01</strong></td>
                                 <td>
-                                    <strong th:text="'[' + ${e.topic.code} + ']'">[DT01]</strong>
-                                    <span class="small d-block text-truncate" style="max-width: 200px;" th:text="${e.topic.title}">Tên</span>
+                                    <div class="fw-bold" th:text="${t.title}">Tên đề tài</div>
+                                    <div class="small text-muted">Bộ môn: <span th:text="${t.department.name}">CNPM</span></div>
                                 </td>
                                 <td>
-                                    <span th:if="${e.evaluationType.name() == 'ADVISOR'}" class="nb-badge nb-badge-black py-0 px-1">Hướng dẫn</span>
-                                    <span th:if="${e.evaluationType.name() == 'REVIEWER'}" class="nb-badge py-0 px-1">Phản biện</span>
-                                    <span th:if="${e.evaluationType.name() == 'COUNCIL'}" class="nb-badge nb-badge-success py-0 px-1">Hội đồng</span>
+                                    <!-- Xem đồ án / tải báo cáo nộp của nhóm -->
+                                    <div th:if="${latestSubmissionMap.get(t.id) != null}">
+                                        <a th:href="@{'/lecturer/groups/download-submission/' + ${latestSubmissionMap.get(t.id).id}}" 
+                                           class="nb-btn nb-btn-sm text-nowrap" title="Tải file đồ án/báo cáo của SV để đọc chấm">
+                                            <i class="bi bi-file-earmark-arrow-down-fill me-1"></i>XEM ĐỒ ÁN
+                                        </a>
+                                        <div class="text-muted" style="font-size: 10px;" th:text="${latestSubmissionMap.get(t.id).title}">Báo cáo cuối kỳ</div>
+                                    </div>
+                                    <span th:if="${latestSubmissionMap.get(t.id) == null}" class="small text-muted fst-italic">Chưa có bài nộp</span>
                                 </td>
                                 <td class="text-center">
-                                    <span class="fs-6 fw-bold" th:text="${#numbers.formatDecimal(e.score, 1, 2)}">8.50</span>
+                                    <span th:if="${evalMap.get(t.id + '_COUNCIL') != null}" 
+                                          class="fs-6 fw-bold text-success" 
+                                          th:text="${#numbers.formatDecimal(evalMap.get(t.id + '_COUNCIL').score, 1, 2)} + ' đ'">9.00 đ</span>
+                                    <span th:if="${evalMap.get(t.id + '_COUNCIL') == null}" 
+                                          class="nb-badge nb-badge-warning py-0 px-1" style="font-size: 11px;">CHƯA CHẤM</span>
                                 </td>
-                                <td>
-                                    <span class="small text-muted" th:text="${e.comments != null ? e.comments : '-'}">-</span>
+                                <td class="text-center">
+                                    <button type="button" class="nb-btn nb-btn-sm nb-btn-black text-nowrap" 
+                                            th:data-topic-id="${t.id}"
+                                            th:data-council-id="${c.id}"
+                                            th:data-type="'COUNCIL'"
+                                            th:data-title="'[' + ${t.code} + '] ' + ${t.title}"
+                                            th:data-score="${evalMap.get(t.id + '_COUNCIL') != null ? evalMap.get(t.id + '_COUNCIL').score : ''}"
+                                            th:data-comments="${evalMap.get(t.id + '_COUNCIL') != null ? evalMap.get(t.id + '_COUNCIL').comments : ''}"
+                                            onclick="quickGrade(this)">
+                                        <i class="bi bi-pencil-fill me-1"></i><span th:text="${evalMap.get(t.id + '_COUNCIL') != null ? 'SỬA ĐIỂM' : 'CHẤM ĐIỂM'}">CHẤM ĐIỂM</span>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
 
+        <!-- 2. PHÂN CÔNG ĐIỂM HƯỚNG DẪN (ADVISOR) -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-uppercase text-dark mb-2">
+                <i class="bi bi-person-video3 me-1"></i>2. NHIỆM VỤ GIẢNG VIÊN HƯỚNG DẪN (CHẤM ĐIỂM GVHD)
+            </h6>
+            <div th:if="${#lists.isEmpty(guidedTopics)}" class="nb-alert nb-alert-light mb-3">
+                <i class="bi bi-info-circle me-1"></i>Bạn không hướng dẫn đề tài nào trong đợt này.
+            </div>
+            <div class="table-responsive" th:if="${!#lists.isEmpty(guidedTopics)}">
+                <table class="nb-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">MÃ ĐỀ TÀI</th>
+                            <th>TÊN ĐỀ TÀI HƯỚNG DẪN</th>
+                            <th style="width: 160px;">TIẾN ĐỘ BÁO CÁO</th>
+                            <th style="width: 150px;" class="text-center">ĐIỂM CỦA BẠN</th>
+                            <th style="width: 180px;" class="text-center">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="t : ${guidedTopics}">
+                            <td><strong th:text="${t.code}">DT01</strong></td>
+                            <td>
+                                <div class="fw-bold" th:text="${t.title}">Tên đề tài</div>
+                                <div class="small text-muted" th:text="${t.department.name}">CNPM</div>
+                            </td>
+                            <td>
+                                <div th:if="${latestSubmissionMap.get(t.id) != null}">
+                                    <a th:href="@{'/lecturer/groups/download-submission/' + ${latestSubmissionMap.get(t.id).id}}" 
+                                       class="nb-btn nb-btn-sm text-nowrap">
+                                        <i class="bi bi-file-earmark-arrow-down-fill me-1"></i>XEM BÁO CÁO
+                                    </a>
+                                </div>
+                                <span th:if="${latestSubmissionMap.get(t.id) == null}" class="small text-muted fst-italic">Chưa nộp bài</span>
+                            </td>
+                            <td class="text-center">
+                                <span th:if="${evalMap.get(t.id + '_ADVISOR') != null}" 
+                                      class="fs-6 fw-bold text-success" 
+                                      th:text="${#numbers.formatDecimal(evalMap.get(t.id + '_ADVISOR').score, 1, 2)} + ' đ'">8.50 đ</span>
+                                <span th:if="${evalMap.get(t.id + '_ADVISOR') == null}" 
+                                      class="nb-badge nb-badge-warning py-0 px-1" style="font-size: 11px;">CHƯA CHẤM</span>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="nb-btn nb-btn-sm nb-btn-black text-nowrap" 
+                                        th:data-topic-id="${t.id}"
+                                        th:data-council-id="''"
+                                        th:data-type="'ADVISOR'"
+                                        th:data-title="'[' + ${t.code} + '] ' + ${t.title}"
+                                        th:data-score="${evalMap.get(t.id + '_ADVISOR') != null ? evalMap.get(t.id + '_ADVISOR').score : ''}"
+                                        th:data-comments="${evalMap.get(t.id + '_ADVISOR') != null ? evalMap.get(t.id + '_ADVISOR').comments : ''}"
+                                        onclick="quickGrade(this)">
+                                    <i class="bi bi-pencil-fill me-1"></i><span th:text="${evalMap.get(t.id + '_ADVISOR') != null ? 'SỬA ĐIỂM' : 'CHẤM ĐIỂM'}">CHẤM ĐIỂM</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHU VỰC NHẬP ĐIỂM & NHẬN XÉT CHI TIẾT (JUMP-TO FORM) -->
+    <div class="row g-4" id="gradingFormSection">
+        <div class="col-lg-12">
+            <div class="nb-card" style="border: 3px solid #000;">
+                <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
+                    <i class="bi bi-pencil-square me-2"></i>PHIẾU NHẬP ĐIỂM & NHẬN XÉT ĐÁNH GIÁ
+                </h5>
+
+                <form th:action="@{/lecturer/evaluations/submit}" method="post" id="evalForm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-uppercase">1. Loại điểm & Vai trò <span class="text-danger">*</span></label>
+                            <select name="evaluationType" id="evaluationTypeSelect" class="nb-input" required onchange="onTypeChanged()">
+                                <option value="">-- Chọn loại điểm --</option>
+                                <option th:each="et : ${evaluationTypes}" th:value="${et.name()}" th:text="${et.displayName}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-uppercase">2. Đề tài cần chấm <span class="text-danger">*</span></label>
+                            <select name="topicId" id="topicSelect" class="nb-input" required>
+                                <option value="">-- Vui lòng chọn loại điểm trước --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" id="councilGroup" style="display: none;">
+                            <label class="form-label small fw-bold text-uppercase">3. Hội đồng phân công <span class="text-danger">*</span></label>
+                            <select name="councilId" id="councilSelect" class="nb-input">
+                                <option value="">-- Chọn Hội đồng bạn tham gia --</option>
+                                <option th:each="c : ${councils}" th:value="${c.id}" th:text="${c.name}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-uppercase">Điểm số (Thang 10.0) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.05" min="0" max="10" name="score" id="scoreInput" class="nb-input" placeholder="VD: 8.5" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold text-uppercase">Nhận xét chuyên môn & Câu hỏi chất vấn</label>
+                            <textarea name="comments" id="commentsInput" class="nb-input" rows="2" placeholder="Ghi nhận xét ưu điểm, hạn chế hoặc câu hỏi chất vấn sinh viên..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top border-2 border-dark">
+                        <button type="submit" class="nb-btn nb-btn-black">
+                            <i class="bi bi-check-circle-fill me-1"></i> XÁC NHẬN LƯU KẾT QUẢ ĐÁNH GIÁ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Lịch sử các điểm bạn đã chấm -->
+    <div class="nb-card mt-4">
+        <h5 class="fw-bold text-uppercase border-bottom border-3 border-dark pb-2 mb-3">
+            <i class="bi bi-clock-history me-2"></i>LỊCH SỬ TỔNG HỢP CÁC ĐIỂM BẠN ĐÃ CHẤM (<span th:text="${#lists.size(myEvaluations)}">0</span>)
+        </h5>
+
+        <div th:if="${#lists.isEmpty(myEvaluations)}" class="text-center py-4 text-muted fw-bold">
+            <i class="bi bi-clipboard2-check fs-3 d-block mb-1"></i>
+            Bạn chưa nhập điểm cho đề tài nào.
+        </div>
+
+        <div class="nb-table-container" th:if="${!#lists.isEmpty(myEvaluations)}">
+            <table class="nb-table">
+                <thead>
+                    <tr>
+                        <th>ĐỀ TÀI</th>
+                        <th style="width: 140px;">LOẠI ĐIỂM</th>
+                        <th style="width: 120px;" class="text-center">ĐIỂM SỐ</th>
+                        <th>NHẬN XÉT CỦA BẠN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="e : ${myEvaluations}">
+                        <td>
+                            <strong th:text="'[' + ${e.topic.code} + ']'">[DT01]</strong>
+                            <span class="small d-block text-truncate" style="max-width: 350px;" th:text="${e.topic.title}">Tên</span>
+                        </td>
+                        <td>
+                            <span th:if="${e.evaluationType.name() == 'ADVISOR'}" class="nb-badge nb-badge-black py-0 px-1">Hướng dẫn</span>
+                            <span th:if="${e.evaluationType.name() == 'REVIEWER'}" class="nb-badge py-0 px-1">Phản biện</span>
+                            <span th:if="${e.evaluationType.name() == 'COUNCIL'}" class="nb-badge nb-badge-success py-0 px-1">Hội đồng</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="fs-6 fw-bold" th:text="${#numbers.formatDecimal(e.score, 1, 2)} + ' đ'">8.50 đ</span>
+                        </td>
+                        <td>
+                            <span class="small text-muted" th:text="${e.comments != null ? e.comments : '-'}">-</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -296,6 +402,45 @@
             councilSelect.removeAttribute('required');
             topicSelect.innerHTML = '<option value="">-- Vui lòng chọn loại điểm trước --</option>';
             helpText.innerText = 'Hệ thống sẽ lọc đúng danh sách đề tài bạn có thẩm quyền chấm.';
+        }
+    }
+
+    function quickGrade(btn) {
+        const topicId = btn.getAttribute('data-topic-id');
+        const councilId = btn.getAttribute('data-council-id');
+        const type = btn.getAttribute('data-type');
+        const score = btn.getAttribute('data-score');
+        const comments = btn.getAttribute('data-comments');
+
+        const typeSelect = document.getElementById('evaluationTypeSelect');
+        typeSelect.value = type;
+        onTypeChanged();
+
+        const topicSelect = document.getElementById('topicSelect');
+        topicSelect.value = topicId;
+
+        if (councilId) {
+            const councilSelect = document.getElementById('councilSelect');
+            councilSelect.value = councilId;
+        }
+
+        const scoreInput = document.getElementById('scoreInput');
+        if (score) {
+            scoreInput.value = score;
+        } else {
+            scoreInput.value = '';
+        }
+
+        const commentsInput = document.getElementById('commentsInput');
+        if (comments) {
+            commentsInput.value = comments;
+        } else {
+            commentsInput.value = '';
+        }
+
+        const formSection = document.getElementById('gradingFormSection');
+        if (formSection) {
+            formSection.scrollIntoView({ behavior: 'smooth' });
         }
     }
     /*]]>*/
