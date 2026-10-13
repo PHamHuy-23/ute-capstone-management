@@ -27,8 +27,8 @@ logs/
 .env
 application-local.properties
 
-### 6. Local Uploads & Temp Scripts ###
+### 6. Local Uploads & Helper Scripts ###
 uploads/
-run_build.py
-run_gen.py
-test_docx_env.py
+scripts/
+*.docx
+PROJECT_MEMORY.md
