@@ -55,7 +55,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 });
 
         if (Boolean.FALSE.equals(user.getIsActive())) {
-            log.warn("[OAuth2 Login Failed] Tài khoản {} đang bị khóa", email);
+            log.warn("[OAuth2 Login Failed] Tài khoản {} đang bị khóa", finalEmail);
             throw new OAuth2AuthenticationException(
                     new OAuth2Error("account_disabled"),
                     "Tài khoản của bạn hiện đang bị tạm khóa. Vui lòng liên hệ Quản trị viên."
