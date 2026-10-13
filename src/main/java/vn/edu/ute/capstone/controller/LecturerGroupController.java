@@ -88,4 +88,23 @@ public class LecturerGroupController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + submission.getFilePath() + "\"")
                 .body(resource);
     }
+
+    @PostMapping("/review-submission/{submissionId}")
+    public String reviewSubmission(
+            @PathVariable("submissionId") Long submissionId,
+            @RequestParam("groupId") Long groupId,
+            @RequestParam("feedback") String feedback,
+            @RequestParam("status") ReviewStatus status,
+            @AuthenticationPrincipal UserDetails userDetails,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes
+    ) {
+        User lecturer = userService.findByUsername(userDetails.getUsername());
+        try {
+            submissionService.reviewSubmission(submissionId, feedback, status, lecturer);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi nhận xét và cập nhật trạng thái báo cáo thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/lecturer/groups/" + groupId + "/submissions";
+    }
 }

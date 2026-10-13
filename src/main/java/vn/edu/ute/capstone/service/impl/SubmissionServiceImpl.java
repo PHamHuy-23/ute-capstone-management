@@ -23,6 +23,7 @@ import vn.edu.ute.capstone.service.SubmissionService;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -154,6 +155,35 @@ public class SubmissionServiceImpl implements SubmissionService {
     public Submission findById(Long submissionId) {
         return submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bản nộp báo cáo với ID: " + submissionId));
+    }
+
+    @Override
+    @Transactional
+    public Submission reviewSubmission(Long submissionId, String feedback, vn.edu.ute.capstone.entity.ReviewStatus status, User currentLecturer) {
+        Submission submission = findById(submissionId);
+        StudentGroup group = submission.getGroup();
+
+        // Guard: Chỉ GVHD của đề tài mới được phản hồi báo cáo
+        boolean isAdmin = currentLecturer.getRoles().stream().anyMatch(r -> "ROLE_ADMIN".equals(r.getName()));
+        boolean isAdvisor = false;
+        if (group.getTopic() != null) {
+            isAdvisor = group.getTopic().getAdvisors().stream()
+                    .anyMatch(a -> a.getLecturer().getId().equals(currentLecturer.getId()));
+        }
+
+        if (!isAdmin && !isAdvisor) {
+            throw new IllegalStateException("Bạn không phải là Giảng viên hướng dẫn của nhóm này để đưa ra phản hồi.");
+        }
+
+        if (feedback == null || feedback.trim().isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng nhập nội dung nhận xét / góp ý cho nhóm sinh viên.");
+        }
+
+        submission.setFeedback(feedback.trim());
+        submission.setReviewStatus(status != null ? status : vn.edu.ute.capstone.entity.ReviewStatus.ACCEPTED);
+        submission.setReviewedAt(LocalDateTime.now());
+
+        return submissionRepository.save(submission);
     }
 
     private void validateAccessToGroupReports(StudentGroup group, User currentUser) {

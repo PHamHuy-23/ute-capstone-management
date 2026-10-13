@@ -138,22 +138,38 @@
                             <thead>
                                 <tr>
                                     <th>TIÊU ĐỀ BÁO CÁO</th>
-                                    <th>NGƯỜI NỘP</th>
-                                    <th>THỜI GIAN</th>
-                                    <th class="text-center">TẢI VỀ</th>
+                                    <th style="width: 140px;">NGƯỜI NỘP</th>
+                                    <th style="width: 140px;">THỜI GIAN</th>
+                                    <th style="width: 140px;" class="text-center">TRẠNG THÁI</th>
+                                    <th style="width: 80px;" class="text-center">TẢI VỀ</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="sub : ${submissions}">
                                     <td>
                                         <div class="fw-bold" th:text="${sub.title}">Báo cáo tuần 1</div>
-                                        <div class="small text-muted" th:if="${sub.notes != null}" th:text="${sub.notes}">Ghi chú</div>
+                                        <div class="small text-muted" th:if="${sub.notes != null}">
+                                            <i class="bi bi-chat-left-quote me-1"></i><span th:text="${sub.notes}">Ghi chú</span>
+                                        </div>
+                                        <!-- Hiển thị nhận xét của GVHD cho nhóm sinh viên -->
+                                        <div th:if="${sub.feedback != null}" class="mt-2 p-2 bg-light border border-2 border-dark small">
+                                            <div class="fw-bold text-dark"><i class="bi bi-chat-dots-fill me-1"></i>Phản hồi từ GV Hướng dẫn:</div>
+                                            <div class="mt-1" th:text="${sub.feedback}">Nội dung nhận xét</div>
+                                            <div class="text-muted" style="font-size: 11px;" th:if="${sub.reviewedAt != null}">
+                                                (Thời gian: <span th:text="${#temporals.format(sub.reviewedAt, 'dd/MM/yyyy HH:mm')}"></span>)
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="small fw-semibold" th:text="${sub.submittedBy.fullName}">Nguyễn Văn A</span>
                                     </td>
                                     <td>
                                         <span class="small" th:text="${#temporals.format(sub.submittedAt, 'dd/MM/yyyy HH:mm')}">14/10/2026 10:00</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span th:if="${sub.reviewStatus.name() == 'ACCEPTED'}" class="nb-badge nb-badge-success" th:text="${sub.reviewStatus.displayName}">Đã chấp nhận</span>
+                                        <span th:if="${sub.reviewStatus.name() == 'REVISE_REQUIRED'}" class="nb-badge nb-badge-danger" th:text="${sub.reviewStatus.displayName}">Yêu cầu chỉnh sửa</span>
+                                        <span th:if="${sub.reviewStatus.name() == 'PENDING'}" class="nb-badge nb-badge-warning" th:text="${sub.reviewStatus.displayName}">Chờ phản hồi</span>
                                     </td>
                                     <td class="text-center">
                                         <a th:href="@{'/student/submissions/download/' + ${sub.id}}" class="nb-btn nb-btn-sm" title="Tải file báo cáo">

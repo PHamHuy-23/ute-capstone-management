@@ -35,6 +35,17 @@ public class Submission {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_status", nullable = false)
+    @Builder.Default
+    private ReviewStatus reviewStatus = ReviewStatus.PENDING;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
+
     @Column(name = "submitted_at", insertable = false, updatable = false)
     private LocalDateTime submittedAt;
 

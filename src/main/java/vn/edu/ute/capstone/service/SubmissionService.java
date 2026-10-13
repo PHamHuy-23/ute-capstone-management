@@ -18,4 +18,6 @@ public interface SubmissionService {
 
     Submission findById(Long submissionId);
 
+    Submission reviewSubmission(Long submissionId, String feedback, vn.edu.ute.capstone.entity.ReviewStatus status, User currentLecturer);
+
 }
