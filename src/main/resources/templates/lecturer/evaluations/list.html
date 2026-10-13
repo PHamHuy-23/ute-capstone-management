@@ -226,6 +226,66 @@
                 </table>
             </div>
         </div>
+
+        <!-- 3. DANH SÁCH ĐỀ TÀI PHẢN BIỆN (REVIEWER) -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-uppercase text-dark mb-2">
+                <i class="bi bi-journal-check me-1"></i>3. NHIỆM VỤ CHẤM PHẢN BIỆN ĐỒ ÁN (REVIEWER)
+            </h6>
+            <div th:if="${#lists.isEmpty(reviewerTopics)}" class="nb-alert nb-alert-light mb-3">
+                <i class="bi bi-info-circle me-1"></i>Không có đề tài phản biện nào khả dụng trong đợt này.
+            </div>
+            <div class="table-responsive" th:if="${!#lists.isEmpty(reviewerTopics)}">
+                <table class="nb-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">MÃ ĐỀ TÀI</th>
+                            <th>TÊN ĐỀ TÀI PHẢN BIỆN</th>
+                            <th style="width: 160px;">BÁO CÁO CỦA SV</th>
+                            <th style="width: 150px;" class="text-center">ĐIỂM CỦA BẠN</th>
+                            <th style="width: 180px;" class="text-center">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="t : ${reviewerTopics}">
+                            <td><strong th:text="${t.code}">DT01</strong></td>
+                            <td>
+                                <div class="fw-bold" th:text="${t.title}">Tên đề tài</div>
+                                <div class="small text-muted" th:text="${t.department.name}">Bộ môn</div>
+                            </td>
+                            <td>
+                                <div th:if="${latestSubmissionMap.get(t.id) != null}">
+                                    <a th:href="@{'/lecturer/groups/download-submission/' + ${latestSubmissionMap.get(t.id).id}}" 
+                                       class="nb-btn nb-btn-sm text-nowrap">
+                                        <i class="bi bi-file-earmark-arrow-down-fill me-1"></i>XEM BÁO CÁO
+                                    </a>
+                                </div>
+                                <span th:if="${latestSubmissionMap.get(t.id) == null}" class="small text-muted fst-italic">Chưa nộp bài</span>
+                            </td>
+                            <td class="text-center">
+                                <span th:if="${evalMap.get(t.id + '_REVIEWER') != null}" 
+                                      class="fs-6 fw-bold text-success" 
+                                      th:text="${#numbers.formatDecimal(evalMap.get(t.id + '_REVIEWER').score, 1, 2)} + ' đ'">8.50 đ</span>
+                                <span th:if="${evalMap.get(t.id + '_REVIEWER') == null}" 
+                                      class="nb-badge nb-badge-warning py-0 px-1" style="font-size: 11px;">CHƯA CHẤM</span>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="nb-btn nb-btn-sm nb-btn-black text-nowrap" 
+                                        th:data-topic-id="${t.id}"
+                                        th:data-council-id="''"
+                                        th:data-type="'REVIEWER'"
+                                        th:data-title="'[' + ${t.code} + '] ' + ${t.title}"
+                                        th:data-score="${evalMap.get(t.id + '_REVIEWER') != null ? evalMap.get(t.id + '_REVIEWER').score : ''}"
+                                        th:data-comments="${evalMap.get(t.id + '_REVIEWER') != null ? evalMap.get(t.id + '_REVIEWER').comments : ''}"
+                                        onclick="quickGrade(this)">
+                                    <i class="bi bi-pencil-fill me-1"></i><span th:text="${evalMap.get(t.id + '_REVIEWER') != null ? 'SỬA ĐIỂM' : 'CHẤM ĐIỂM'}">CHẤM ĐIỂM</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- KHU VỰC NHẬP ĐIỂM & NHẬN XÉT CHI TIẾT (JUMP-TO FORM) -->
@@ -248,8 +308,29 @@
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-uppercase">2. Đề tài cần chấm <span class="text-danger">*</span></label>
                             <select name="topicId" id="topicSelect" class="nb-input" required>
-                                <option value="">-- Vui lòng chọn loại điểm trước --</option>
+                                <option value="">-- Chọn đề tài cần chấm --</option>
+                                <optgroup label="Đề tài bạn hướng dẫn (Điểm GVHD)" id="optgroupAdvisor" th:if="${!#lists.isEmpty(guidedTopics)}">
+                                    <option th:each="t : ${guidedTopics}" 
+                                            th:value="${t.id}" 
+                                            th:text="'[' + ${t.code} + '] ' + ${t.title}"
+                                            th:selected="${targetTopicId != null && targetTopicId == t.id}"></option>
+                                </optgroup>
+                                <optgroup label="Đề tài Hội đồng của bạn (Điểm Hội đồng)" id="optgroupCouncil" th:if="${!#lists.isEmpty(councilTopics)}">
+                                    <option th:each="t : ${councilTopics}" 
+                                            th:value="${t.id}" 
+                                            th:text="'[' + ${t.code} + '] ' + ${t.title}"
+                                            th:selected="${targetTopicId != null && targetTopicId == t.id}"></option>
+                                </optgroup>
+                                <optgroup label="Đề tài chấm Phản biện (GVPB)" id="optgroupReviewer" th:if="${!#lists.isEmpty(reviewerTopics)}">
+                                    <option th:each="t : ${reviewerTopics}" 
+                                            th:value="${t.id}" 
+                                            th:text="'[' + ${t.code} + '] ' + ${t.title}"
+                                            th:selected="${targetTopicId != null && targetTopicId == t.id}"></option>
+                                </optgroup>
                             </select>
+                            <div class="form-text small text-muted" id="topicHelpText" style="font-size: 11px;">
+                                Chọn vai trò/loại điểm hoặc click nút "CHẤM ĐIỂM" ở danh sách trên để hệ thống tự động chọn đề tài.
+                            </div>
                         </div>
                         <div class="col-md-4" id="councilGroup" style="display: none;">
                             <label class="form-label small fw-bold text-uppercase">3. Hội đồng phân công <span class="text-danger">*</span></label>
@@ -353,55 +434,38 @@
         const helpText = document.getElementById('topicHelpText');
 
         const selectedType = typeSelect.value;
-        topicSelect.innerHTML = '<option value="">-- Chọn đề tài --</option>';
+        const optAdvisor = document.getElementById('optgroupAdvisor');
+        const optCouncil = document.getElementById('optgroupCouncil');
+        const optReviewer = document.getElementById('optgroupReviewer');
 
         if (selectedType === 'ADVISOR') {
             councilGroup.style.display = 'none';
             councilSelect.removeAttribute('required');
-            helpText.innerText = 'Chỉ hiển thị các đề tài bạn đang hướng dẫn.';
-            if (guidedTopics.length === 0) {
-                topicSelect.innerHTML = '<option value="">(Không có đề tài nào bạn đang hướng dẫn)</option>';
-            } else {
-                guidedTopics.forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.text = '[' + t.code + '] ' + t.title;
-                    topicSelect.appendChild(opt);
-                });
-            }
+            helpText.innerText = 'Đang hiển thị các đề tài bạn đang hướng dẫn (Điểm GVHD).';
+            if (optAdvisor) optAdvisor.style.display = '';
+            if (optCouncil) optCouncil.style.display = 'none';
+            if (optReviewer) optReviewer.style.display = 'none';
         } else if (selectedType === 'COUNCIL') {
             councilGroup.style.display = 'block';
             councilSelect.setAttribute('required', 'required');
-            helpText.innerText = 'Chỉ hiển thị các đề tài được phân công cho Hội đồng của bạn.';
-            if (councilTopics.length === 0) {
-                topicSelect.innerHTML = '<option value="">(Chưa có đề tài nào phân công cho Hội đồng của bạn)</option>';
-            } else {
-                councilTopics.forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.text = '[' + t.code + '] ' + t.title;
-                    topicSelect.appendChild(opt);
-                });
-            }
+            helpText.innerText = 'Đang hiển thị các đề tài phân công cho Hội đồng của bạn (Điểm Hội đồng).';
+            if (optAdvisor) optAdvisor.style.display = 'none';
+            if (optCouncil) optCouncil.style.display = '';
+            if (optReviewer) optReviewer.style.display = 'none';
         } else if (selectedType === 'REVIEWER') {
             councilGroup.style.display = 'none';
             councilSelect.removeAttribute('required');
-            helpText.innerText = 'Hiển thị các đề tài bạn không hướng dẫn (Độc lập chấm phản biện).';
-            if (reviewerTopics.length === 0) {
-                topicSelect.innerHTML = '<option value="">(Không có đề tài phản biện)</option>';
-            } else {
-                reviewerTopics.forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.text = '[' + t.code + '] ' + t.title;
-                    topicSelect.appendChild(opt);
-                });
-            }
+            helpText.innerText = 'Đang hiển thị các đề tài bạn được phân công / đủ điều kiện chấm phản biện (GVPB).';
+            if (optAdvisor) optAdvisor.style.display = 'none';
+            if (optCouncil) optCouncil.style.display = 'none';
+            if (optReviewer) optReviewer.style.display = '';
         } else {
             councilGroup.style.display = 'none';
             councilSelect.removeAttribute('required');
-            topicSelect.innerHTML = '<option value="">-- Vui lòng chọn loại điểm trước --</option>';
-            helpText.innerText = 'Hệ thống sẽ lọc đúng danh sách đề tài bạn có thẩm quyền chấm.';
+            helpText.innerText = 'Chọn vai trò/loại điểm hoặc click nút "CHẤM ĐIỂM" ở danh sách trên để hệ thống tự động chọn đề tài.';
+            if (optAdvisor) optAdvisor.style.display = '';
+            if (optCouncil) optCouncil.style.display = '';
+            if (optReviewer) optReviewer.style.display = '';
         }
     }
 
@@ -425,24 +489,24 @@
         }
 
         const scoreInput = document.getElementById('scoreInput');
-        if (score) {
-            scoreInput.value = score;
-        } else {
-            scoreInput.value = '';
-        }
+        scoreInput.value = score ? score : '';
 
         const commentsInput = document.getElementById('commentsInput');
-        if (comments) {
-            commentsInput.value = comments;
-        } else {
-            commentsInput.value = '';
-        }
+        commentsInput.value = comments ? comments : '';
 
         const formSection = document.getElementById('gradingFormSection');
         if (formSection) {
             formSection.scrollIntoView({ behavior: 'smooth' });
         }
     }
+
+    // Tự động kích hoạt khi tải trang nếu có targetType hoặc targetTopicId
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('evaluationTypeSelect');
+        if (typeSelect && typeSelect.value) {
+            onTypeChanged();
+        }
+    });
     /*]]>*/
 </script>
 
