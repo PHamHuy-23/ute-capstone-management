@@ -1,6 +1,11 @@
 package vn.edu.ute.capstone.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +15,9 @@ import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
 import vn.edu.ute.capstone.repository.StudentGroupRepository;
 import vn.edu.ute.capstone.repository.TopicRepository;
 import vn.edu.ute.capstone.service.EvaluationService;
+import vn.edu.ute.capstone.service.ExcelService;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +30,23 @@ public class PublicResultController {
     private final StudentGroupRepository groupRepository;
     private final EvaluationService evaluationService;
     private final RegistrationPeriodRepository periodRepository;
+    private final ExcelService excelService;
+
+    @GetMapping("/admin/publish/export-excel")
+    public ResponseEntity<InputStreamResource> exportResultsToExcel(
+            @RequestParam(name = "periodId", required = false) Long periodId
+    ) {
+        ByteArrayInputStream in = excelService.exportResultsToExcel(periodId);
+        String filename = "Bang_Diem_Tong_Ket_" + (periodId != null ? "Dot_" + periodId : "Tat_Ca") + ".xlsx";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=" + filename);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(in));
+    }
 
     @GetMapping({"/admin/publish", "/student/results"})
     public String viewResults(

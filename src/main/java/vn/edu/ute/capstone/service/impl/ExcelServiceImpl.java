@@ -1,13 +1,17 @@
 package vn.edu.ute.capstone.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import vn.edu.ute.capstone.dto.RegistrationPeriodDTO;
-import vn.edu.ute.capstone.entity.PeriodStatus;
-import vn.edu.ute.capstone.entity.PeriodType;
+import vn.edu.ute.capstone.entity.*;
+import vn.edu.ute.capstone.repository.RegistrationPeriodRepository;
+import vn.edu.ute.capstone.repository.StudentGroupRepository;
+import vn.edu.ute.capstone.repository.TopicRepository;
+import vn.edu.ute.capstone.service.EvaluationService;
 import vn.edu.ute.capstone.service.ExcelService;
 
 import java.io.ByteArrayInputStream;
@@ -19,10 +23,17 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class ExcelServiceImpl implements ExcelService {
+
+    private final TopicRepository topicRepository;
+    private final StudentGroupRepository groupRepository;
+    private final EvaluationService evaluationService;
+    private final RegistrationPeriodRepository periodRepository;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -348,6 +359,219 @@ public class ExcelServiceImpl implements ExcelService {
         } catch (IOException e) {
             log.error("Lỗi khi đọc file Excel đề tài: ", e);
             throw new RuntimeException("Không thể đọc định dạng file Excel: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public ByteArrayInputStream exportResultsToExcel(Long periodId) {
+        List<Topic> topics = (periodId != null && periodId > 0)
+                ? topicRepository.findByPeriodId(periodId)
+                : topicRepository.findAll();
+
+        String periodName = "TOAN_BO_CAC_DOT";
+        if (periodId != null && periodId > 0) {
+            Optional<RegistrationPeriod> periodOpt = periodRepository.findById(periodId);
+            if (periodOpt.isPresent()) {
+                periodName = periodOpt.get().getName();
+            }
+        }
+
+        String[] headers = {
+                "STT",
+                "MÃ ĐỀ TÀI",
+                "TÊN ĐỀ TÀI",
+                "BỘ MÔN",
+                "MÃ NHÓM",
+                "DANH SÁCH SINH VIÊN",
+                "GV HƯỚNG DẪN",
+                "ĐIỂM HƯỚNG DẪN",
+                "ĐIỂM PHẢN BIỆN",
+                "ĐIỂM HỘI ĐỒNG",
+                "ĐIỂM TRUNG BÌNH",
+                "XẾP LOẠI"
+        };
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Bang_Diem_Tong_Ket");
+
+            // Header Style
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
+            CellStyle headerCellStyle = workbook.createCellStyle();
+            headerCellStyle.setFont(headerFont);
+            headerCellStyle.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+            headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            headerCellStyle.setBorderBottom(BorderStyle.MEDIUM);
+            headerCellStyle.setBorderTop(BorderStyle.MEDIUM);
+            headerCellStyle.setBorderRight(BorderStyle.THIN);
+            headerCellStyle.setBorderLeft(BorderStyle.THIN);
+
+            // Data Row Style
+            CellStyle dataCellStyle = workbook.createCellStyle();
+            dataCellStyle.setBorderBottom(BorderStyle.THIN);
+            dataCellStyle.setBorderTop(BorderStyle.THIN);
+            dataCellStyle.setBorderRight(BorderStyle.THIN);
+            dataCellStyle.setBorderLeft(BorderStyle.THIN);
+            dataCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            // Center Data Style
+            CellStyle centerCellStyle = workbook.createCellStyle();
+            centerCellStyle.cloneStyleFrom(dataCellStyle);
+            centerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            // Number/Score Style
+            CellStyle scoreCellStyle = workbook.createCellStyle();
+            scoreCellStyle.cloneStyleFrom(centerCellStyle);
+            Font boldScoreFont = workbook.createFont();
+            boldScoreFont.setBold(true);
+            scoreCellStyle.setFont(boldScoreFont);
+            DataFormat df = workbook.createDataFormat();
+            scoreCellStyle.setDataFormat(df.getFormat("0.00"));
+
+            // Dòng tiêu đề
+            Row headerRow = sheet.createRow(0);
+            headerRow.setHeightInPoints(25);
+            for (int col = 0; col < headers.length; col++) {
+                Cell cell = headerRow.createCell(col);
+                cell.setCellValue(headers[col]);
+                cell.setCellStyle(headerCellStyle);
+            }
+
+            int rowIdx = 1;
+            for (Topic t : topics) {
+                Row row = sheet.createRow(rowIdx);
+                row.setHeightInPoints(22);
+
+                // 1. STT
+                Cell c0 = row.createCell(0);
+                c0.setCellValue(rowIdx);
+                c0.setCellStyle(centerCellStyle);
+
+                // 2. Mã đề tài
+                Cell c1 = row.createCell(1);
+                c1.setCellValue(t.getCode() != null ? t.getCode() : "");
+                c1.setCellStyle(centerCellStyle);
+
+                // 3. Tên đề tài
+                Cell c2 = row.createCell(2);
+                c2.setCellValue(t.getTitle() != null ? t.getTitle() : "");
+                c2.setCellStyle(dataCellStyle);
+
+                // 4. Bộ môn
+                Cell c3 = row.createCell(3);
+                c3.setCellValue(t.getDepartment() != null ? t.getDepartment().getName() : "");
+                c3.setCellStyle(dataCellStyle);
+
+                // 5. Mã nhóm & Danh sách sinh viên
+                Optional<StudentGroup> groupOpt = groupRepository.findByTopicId(t.getId());
+                String groupCode = "";
+                List<String> studentInfoList = new ArrayList<>();
+                if (groupOpt.isPresent()) {
+                    StudentGroup g = groupOpt.get();
+                    groupCode = g.getGroupCode();
+                    for (GroupMember gm : g.getMembers()) {
+                        String sStr = gm.getStudent().getFullName() + " (" + gm.getStudent().getUsername() + ")";
+                        if (Boolean.TRUE.equals(gm.getIsLeader())) {
+                            sStr += " [Trưởng nhóm]";
+                        }
+                        studentInfoList.add(sStr);
+                    }
+                }
+                Cell c4 = row.createCell(4);
+                c4.setCellValue(groupCode);
+                c4.setCellStyle(centerCellStyle);
+
+                Cell c5 = row.createCell(5);
+                c5.setCellValue(String.join(", ", studentInfoList));
+                c5.setCellStyle(dataCellStyle);
+
+                // 6. GV Hướng dẫn
+                List<String> advisorNames = new ArrayList<>();
+                for (TopicAdvisor adv : t.getAdvisors()) {
+                    String aStr = adv.getLecturer().getFullName();
+                    if (Boolean.TRUE.equals(adv.getIsPrimary())) {
+                        aStr += " (Chính)";
+                    } else {
+                        aStr += " (Đồng HD)";
+                    }
+                    advisorNames.add(aStr);
+                }
+                Cell c6 = row.createCell(6);
+                c6.setCellValue(String.join(", ", advisorNames));
+                c6.setCellStyle(dataCellStyle);
+
+                // 7. Điểm chi tiết & Điểm TB
+                List<Evaluation> evals = evaluationService.getEvaluationsByTopic(t.getId(), null);
+                List<String> advisorScores = new ArrayList<>();
+                List<String> reviewerScores = new ArrayList<>();
+                List<String> councilScores = new ArrayList<>();
+
+                for (Evaluation ev : evals) {
+                    String scoreStr = String.format("%.2f", ev.getScore());
+                    if (ev.getEvaluationType() == EvaluationType.ADVISOR) {
+                        advisorScores.add(scoreStr);
+                    } else if (ev.getEvaluationType() == EvaluationType.REVIEWER) {
+                        reviewerScores.add(scoreStr + " (" + ev.getEvaluator().getFullName() + ")");
+                    } else if (ev.getEvaluationType() == EvaluationType.COUNCIL) {
+                        councilScores.add(scoreStr + " (" + ev.getEvaluator().getFullName() + ")");
+                    }
+                }
+
+                Cell c7 = row.createCell(7);
+                c7.setCellValue(String.join(", ", advisorScores));
+                c7.setCellStyle(centerCellStyle);
+
+                Cell c8 = row.createCell(8);
+                c8.setCellValue(String.join(", ", reviewerScores));
+                c8.setCellStyle(centerCellStyle);
+
+                Cell c9 = row.createCell(9);
+                c9.setCellValue(String.join(", ", councilScores));
+                c9.setCellStyle(centerCellStyle);
+
+                // 8. Điểm TB & Xếp loại
+                Double avg = evaluationService.getAverageScore(t.getId());
+                Cell c10 = row.createCell(10);
+                Cell c11 = row.createCell(11);
+                c11.setCellStyle(centerCellStyle);
+
+                if (avg != null) {
+                    c10.setCellValue(avg);
+                    c10.setCellStyle(scoreCellStyle);
+
+                    if (avg >= 8.5) {
+                        c11.setCellValue("GIỎI");
+                    } else if (avg >= 7.0) {
+                        c11.setCellValue("KHÁ");
+                    } else if (avg >= 5.0) {
+                        c11.setCellValue("ĐẠT");
+                    } else {
+                        c11.setCellValue("KHÔNG ĐẠT");
+                    }
+                } else {
+                    c10.setCellValue("Chưa có");
+                    c10.setCellStyle(centerCellStyle);
+                    c11.setCellValue("-");
+                }
+
+                rowIdx++;
+            }
+
+            // Tự động điều chỉnh độ rộng cột
+            for (int col = 0; col < headers.length; col++) {
+                sheet.autoSizeColumn(col);
+                int currentWidth = sheet.getColumnWidth(col);
+                sheet.setColumnWidth(col, Math.min(Math.max(currentWidth + 1200, 3000), 18000));
+            }
+
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        } catch (IOException e) {
+            log.error("Lỗi khi xuất bảng điểm ra Excel: ", e);
+            throw new RuntimeException("Không thể tạo file Excel báo cáo: " + e.getMessage());
         }
     }
 

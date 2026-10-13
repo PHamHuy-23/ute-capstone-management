@@ -29,4 +29,9 @@ public interface ExcelService {
      */
     List<vn.edu.ute.capstone.dto.TopicProposalDTO> parseTopicExcelFile(MultipartFile file, Long defaultPeriodId, Long defaultDeptId);
 
+    /**
+     * Xuất Bảng điểm & Báo cáo Tổng hợp kết quả toàn đợt ra file Excel.
+     */
+    ByteArrayInputStream exportResultsToExcel(Long periodId);
+
 }

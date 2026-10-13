@@ -21,6 +21,13 @@
             <a href="/dashboard" class="nb-btn nb-btn-sm">
                 <i class="bi bi-arrow-left me-1"></i>DASHBOARD
             </a>
+            <!-- Nút Xuất Bảng Điểm Ra Excel (Dành cho Admin & Trưởng bộ môn) -->
+            <a th:href="@{/admin/publish/export-excel(periodId=${selectedPeriodId})}" 
+               class="nb-btn nb-btn-sm nb-btn-black" 
+               title="Tải về file Excel bảng điểm tổng kết"
+               sec:authorize="hasAnyRole('ADMIN', 'HEAD_OF_DEPARTMENT')">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>XUẤT BẢNG ĐIỂM EXCEL
+            </a>
         </div>
     </div>
 
