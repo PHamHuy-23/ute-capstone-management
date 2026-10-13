@@ -48,4 +48,15 @@ public class RegistrationPeriodDTO {
 
     private PeriodStatus status;
 
+    private Integer minCredits;
+
+    private java.math.BigDecimal minGpa;
+
+    private Long targetDepartmentId;
+
+    private String targetCohort;
+
+    @Builder.Default
+    private Boolean requiresAdvisorApproval = false;
+
 }

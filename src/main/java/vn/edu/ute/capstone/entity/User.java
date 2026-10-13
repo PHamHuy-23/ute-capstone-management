@@ -52,6 +52,14 @@ public class User {
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
+    @Column(name = "accumulated_credits")
+    @Builder.Default
+    private Integer accumulatedCredits = 0;
+
+    @Column(name = "gpa", precision = 3, scale = 2)
+    @Builder.Default
+    private java.math.BigDecimal gpa = java.math.BigDecimal.ZERO;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 

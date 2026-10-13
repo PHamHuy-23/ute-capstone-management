@@ -104,10 +104,42 @@
                         Theo quy định, bạn có thể tự đứng ra tạo nhóm mới (trở thành Nhóm trưởng) hoặc nhờ bạn nhóm trưởng khác thêm bạn vào nhóm bằng mã sinh viên (MSSV).
                     </p>
 
+                    <!-- Tiêu chuẩn xét duyệt & Điều kiện tham gia đợt -->
+                    <div th:if="${selectedPeriod != null}" class="text-start mb-4">
+                        <div th:if="${eligibility != null and !eligibility.eligible}" class="nb-alert nb-alert-danger mb-3">
+                            <div class="fw-bold text-uppercase d-flex align-items-center mb-1">
+                                <i class="bi bi-x-octagon-fill me-2 fs-5"></i> BẠN CHƯA ĐỦ ĐIỀU KIỆN THAM GIA ĐỢT NÀY
+                            </div>
+                            <ul class="mb-0 ps-3 small">
+                                <li th:each="r : ${eligibility.reasons}" th:text="${r}"></li>
+                            </ul>
+                        </div>
+                        <div th:if="${eligibility != null and eligibility.eligible}" class="nb-alert nb-alert-success mb-3">
+                            <div class="fw-bold text-uppercase d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2 fs-5"></i> BẠN ĐỦ ĐIỀU KIỆN THAM GIA ĐỢT NÀY
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                                Hồ sơ của bạn (Tín chỉ: <span th:text="${student.accumulatedCredits != null ? student.accumulatedCredits : 0}"></span>, 
+                                GPA: <span th:text="${student.gpa != null ? student.gpa : '0.0'}"></span>, 
+                                Khoa: <span th:text="${student.department != null ? student.department.name : 'N/A'}"></span>) thỏa mãn tiêu chí của đợt.
+                            </small>
+                            <div th:if="${selectedPeriod.requiresAdvisorApproval}" class="mt-2 text-warning-emphasis small fw-bold">
+                                <i class="bi bi-info-circle me-1"></i> Lưu ý: Đợt này yêu cầu có sự đồng ý/bảo trợ trước từ Giảng viên hướng dẫn.
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Form tạo nhóm mới -->
                     <div th:if="${selectedPeriod != null and selectedPeriod.status.name() == 'OPEN_STUDENT'}" class="text-start border-top border-2 border-dark pt-3">
                         <h6 class="fw-bold text-uppercase mb-3"><i class="bi bi-plus-circle-fill me-1"></i>TẠO NHÓM MỚI</h6>
-                        <form th:action="@{/student/group/create}" method="post">
+                        
+                        <div th:if="${eligibility != null and !eligibility.eligible}">
+                            <button type="button" class="nb-btn w-100" style="opacity: 0.6; cursor: not-allowed;" disabled>
+                                <i class="bi bi-slash-circle me-1"></i> KHÔNG THỂ TẠO NHÓM (KHÔNG ĐỦ ĐIỀU KIỆN)
+                            </button>
+                        </div>
+
+                        <form th:if="${eligibility == null or eligibility.eligible}" th:action="@{/student/group/create}" method="post">
                             <input type="hidden" name="periodId" th:value="${selectedPeriodId}">
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-uppercase">Mã nhóm đề xuất <span class="text-danger">*</span></label>

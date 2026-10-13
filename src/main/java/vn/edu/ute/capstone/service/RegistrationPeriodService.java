@@ -20,4 +20,7 @@ public interface RegistrationPeriodService {
 
     void deletePeriod(Long id);
 
+    vn.edu.ute.capstone.dto.StudentEligibilityDTO checkStudentEligibility(vn.edu.ute.capstone.entity.User student, RegistrationPeriod period);
+
 }
+

@@ -21,6 +21,7 @@ public class RegistrationPeriodServiceImpl implements RegistrationPeriodService 
 
     private final RegistrationPeriodRepository periodRepository;
     private final TopicRepository topicRepository;
+    private final vn.edu.ute.capstone.repository.DepartmentRepository departmentRepository;
 
     // Định nghĩa bảng chuyển trạng thái hợp lệ (State Machine Transitions)
     // Mỗi trạng thái chỉ được chuyển sang các trạng thái kế tiếp theo đúng quy trình
@@ -55,6 +56,11 @@ public class RegistrationPeriodServiceImpl implements RegistrationPeriodService 
         // Chặn trùng lặp: Kiểm tra xem có đợt nào cùng loại đang mở không
         validateNoConflictingActivePeriod(dto.getPeriodType(), null);
 
+        vn.edu.ute.capstone.entity.Department targetDept = null;
+        if (dto.getTargetDepartmentId() != null) {
+            targetDept = departmentRepository.findById(dto.getTargetDepartmentId()).orElse(null);
+        }
+
         RegistrationPeriod period = RegistrationPeriod.builder()
                 .name(dto.getName().trim())
                 .periodType(dto.getPeriodType())
@@ -64,6 +70,11 @@ public class RegistrationPeriodServiceImpl implements RegistrationPeriodService 
                 .studentEndDate(dto.getStudentEndDate())
                 .reviewDeadline(dto.getReviewDeadline())
                 .defenseDate(dto.getDefenseDate())
+                .minCredits(dto.getMinCredits())
+                .minGpa(dto.getMinGpa())
+                .targetDepartment(targetDept)
+                .targetCohort(dto.getTargetCohort() != null ? dto.getTargetCohort().trim() : null)
+                .requiresAdvisorApproval(Boolean.TRUE.equals(dto.getRequiresAdvisorApproval()))
                 .status(dto.getStatus() != null ? dto.getStatus() : PeriodStatus.DRAFT)
                 .build();
 
@@ -91,6 +102,11 @@ public class RegistrationPeriodServiceImpl implements RegistrationPeriodService 
         validatePeriodDates(dto);
         validateNoConflictingActivePeriod(dto.getPeriodType(), id);
 
+        vn.edu.ute.capstone.entity.Department targetDept = null;
+        if (dto.getTargetDepartmentId() != null) {
+            targetDept = departmentRepository.findById(dto.getTargetDepartmentId()).orElse(null);
+        }
+
         period.setName(dto.getName().trim());
         period.setPeriodType(dto.getPeriodType());
         period.setLecturerStartDate(dto.getLecturerStartDate());
@@ -99,6 +115,11 @@ public class RegistrationPeriodServiceImpl implements RegistrationPeriodService 
         period.setStudentEndDate(dto.getStudentEndDate());
         period.setReviewDeadline(dto.getReviewDeadline());
         period.setDefenseDate(dto.getDefenseDate());
+        period.setMinCredits(dto.getMinCredits());
+        period.setMinGpa(dto.getMinGpa());
+        period.setTargetDepartment(targetDept);
+        period.setTargetCohort(dto.getTargetCohort() != null ? dto.getTargetCohort().trim() : null);
+        period.setRequiresAdvisorApproval(Boolean.TRUE.equals(dto.getRequiresAdvisorApproval()));
 
         return periodRepository.save(period);
     }
@@ -186,4 +207,84 @@ public class RegistrationPeriodServiceImpl implements RegistrationPeriodService 
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public vn.edu.ute.capstone.dto.StudentEligibilityDTO checkStudentEligibility(vn.edu.ute.capstone.entity.User student, RegistrationPeriod period) {
+        vn.edu.ute.capstone.dto.StudentEligibilityDTO result = new vn.edu.ute.capstone.dto.StudentEligibilityDTO();
+        result.setEligible(true);
+
+        if (student == null || period == null) {
+            result.setEligible(false);
+            result.addReason("Thông tin sinh viên hoặc đợt đăng ký không hợp lệ.");
+            return result;
+        }
+
+        // 1. Kiểm tra số tín chỉ tích lũy (minCredits)
+        if (period.getMinCredits() != null && period.getMinCredits() > 0) {
+            int studentCredits = student.getAccumulatedCredits() != null ? student.getAccumulatedCredits() : 0;
+            if (studentCredits < period.getMinCredits()) {
+                result.setEligible(false);
+                result.addReason(String.format("Số tín chỉ tích lũy hiện tại (%d) chưa đạt điều kiện tối thiểu (%d tín chỉ).",
+                        studentCredits, period.getMinCredits()));
+            }
+        }
+
+        // 2. Kiểm tra điểm trung bình tích lũy GPA (minGpa)
+        if (period.getMinGpa() != null && period.getMinGpa().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            java.math.BigDecimal studentGpa = student.getGpa() != null ? student.getGpa() : java.math.BigDecimal.ZERO;
+            if (studentGpa.compareTo(period.getMinGpa()) < 0) {
+                result.setEligible(false);
+                result.addReason(String.format("Điểm GPA tích lũy (%.2f) chưa đạt mức tối thiểu yêu cầu (%.2f/4.0).",
+                        studentGpa, period.getMinGpa()));
+            }
+        }
+
+        // 3. Kiểm tra Niên khóa / Khóa sinh viên (targetCohort - ví dụ: "21,22")
+        if (period.getTargetCohort() != null && !period.getTargetCohort().trim().isEmpty()) {
+            String cohortStr = period.getTargetCohort().trim();
+            // Trích xuất 2 chữ số đầu của MSSV (VD: 21110123 -> "21")
+            String username = student.getUsername() != null ? student.getUsername().trim() : "";
+            String studentCohort = "";
+            if (username.length() >= 2 && Character.isDigit(username.charAt(0)) && Character.isDigit(username.charAt(1))) {
+                studentCohort = username.substring(0, 2);
+            }
+
+            String[] allowedCohorts = cohortStr.split("[,; ]+");
+            boolean cohortMatched = false;
+            for (String allowed : allowedCohorts) {
+                String clean = allowed.trim().replace("K", "").replace("k", "");
+                if (!clean.isEmpty() && clean.equalsIgnoreCase(studentCohort)) {
+                    cohortMatched = true;
+                    break;
+                }
+            }
+
+            if (!studentCohort.isEmpty() && !cohortMatched) {
+                result.setEligible(false);
+                result.addReason(String.format("Khóa sinh viên của bạn (K%s) không thuộc diện đối tượng đăng ký đợt này (Dành cho: K%s).",
+                        studentCohort, cohortStr));
+            }
+        }
+
+        // 4. Kiểm tra Khoa / Bộ môn phụ trách (targetDepartment)
+        if (period.getTargetDepartment() != null) {
+            if (student.getDepartment() == null || !period.getTargetDepartment().getId().equals(student.getDepartment().getId())) {
+                result.setEligible(false);
+                String targetDeptName = period.getTargetDepartment().getName();
+                String studentDeptName = student.getDepartment() != null ? student.getDepartment().getName() : "Chưa xác định";
+                result.addReason(String.format("Đợt này chỉ dành cho sinh viên thuộc khoa '%s' (Bạn thuộc: '%s').",
+                        targetDeptName, studentDeptName));
+            }
+        }
+
+        // 5. Yêu cầu có chấp thuận trước của GVHD (requiresAdvisorApproval) đối với NCKH
+        if (Boolean.TRUE.equals(period.getRequiresAdvisorApproval())) {
+            // Nhắc nhở điều kiện tiên quyết: Cần có xác nhận bảo trợ/đồng ý của GVHD
+            // Nếu là đợt NCKH có cờ này, ghi chú rõ ràng cho SV
+        }
+
+        return result;
+    }
+
 }
+

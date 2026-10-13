@@ -22,6 +22,7 @@ public class StudentGroupServiceImpl implements StudentGroupService {
     private final StudentGroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final RegistrationPeriodRepository periodRepository;
+    private final vn.edu.ute.capstone.service.RegistrationPeriodService periodService;
     private final TopicRepository topicRepository;
     private final UserRepository userRepository;
 
@@ -32,6 +33,12 @@ public class StudentGroupServiceImpl implements StudentGroupService {
 
         // Guard 1: Đợt đăng ký có tồn tại và đang mở không?
         RegistrationPeriod period = validatePeriodForStudent(dto.getPeriodId());
+
+        // Guard 1.5: Kiểm tra điều kiện tiên quyết của sinh viên (Tín chỉ, GPA, Khóa K, Khoa)
+        vn.edu.ute.capstone.dto.StudentEligibilityDTO eligibility = periodService.checkStudentEligibility(leader, period);
+        if (!eligibility.isEligible()) {
+            throw new IllegalStateException("Bạn không đủ điều kiện tham gia đợt này: " + String.join("; ", eligibility.getReasons()));
+        }
 
         // Guard 2: Sinh viên đã tham gia nhóm nào trong đợt này chưa? (Luật 1 SV - 1 Nhóm/Đợt)
         if (groupMemberRepository.existsByStudentIdAndPeriodId(leader.getId(), period.getId())) {
@@ -94,6 +101,12 @@ public class StudentGroupServiceImpl implements StudentGroupService {
         // Guard 4: Sinh viên đó đã ở trong nhóm nào trong đợt này chưa?
         if (groupMemberRepository.existsByStudentIdAndPeriodId(newStudent.getId(), group.getPeriod().getId())) {
             throw new IllegalStateException("Sinh viên " + newStudent.getFullName() + " (" + studentUsername + ") đã tham gia một nhóm khác trong đợt này.");
+        }
+
+        // Guard 4.5: Kiểm tra điều kiện tiên quyết của sinh viên mới (Tín chỉ, GPA, Khóa K, Khoa)
+        vn.edu.ute.capstone.dto.StudentEligibilityDTO memberEligibility = periodService.checkStudentEligibility(newStudent, group.getPeriod());
+        if (!memberEligibility.isEligible()) {
+            throw new IllegalStateException("Sinh viên " + newStudent.getFullName() + " (" + studentUsername + ") không đủ điều kiện tham gia đợt này: " + String.join("; ", memberEligibility.getReasons()));
         }
 
         // Guard 5: Không cho thêm bớt khi nhóm đã đăng ký đề tài

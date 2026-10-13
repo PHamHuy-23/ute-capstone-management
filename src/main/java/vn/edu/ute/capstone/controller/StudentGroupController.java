@@ -30,6 +30,7 @@ public class StudentGroupController {
     private final StudentGroupService groupService;
     private final UserService userService;
     private final RegistrationPeriodRepository periodRepository;
+    private final vn.edu.ute.capstone.service.RegistrationPeriodService periodService;
     private final vn.edu.ute.capstone.service.TopicService topicService;
     private final vn.edu.ute.capstone.repository.SubmissionRepository submissionRepository;
     private final vn.edu.ute.capstone.service.EvaluationService evaluationService;
@@ -82,8 +83,12 @@ public class StudentGroupController {
         }
 
         RegistrationPeriod selectedPeriod = null;
+        vn.edu.ute.capstone.dto.StudentEligibilityDTO eligibility = null;
         if (currentPeriodId != null) {
             selectedPeriod = periodRepository.findById(currentPeriodId).orElse(null);
+            if (selectedPeriod != null) {
+                eligibility = periodService.checkStudentEligibility(student, selectedPeriod);
+            }
         }
 
         model.addAttribute("student", student);
@@ -94,6 +99,7 @@ public class StudentGroupController {
         model.addAttribute("averageScore", averageScore);
         model.addAttribute("selectedPeriodId", currentPeriodId);
         model.addAttribute("selectedPeriod", selectedPeriod);
+        model.addAttribute("eligibility", eligibility);
         model.addAttribute("periods", periodRepository.findAllByOrderByCreatedAtDesc());
         model.addAttribute("activePeriods", activePeriods);
         model.addAttribute("createGroupForm", new CreateGroupDTO());

@@ -32,6 +32,7 @@ public class PeriodController {
 
     private final RegistrationPeriodService periodService;
     private final ExcelService excelService;
+    private final vn.edu.ute.capstone.repository.DepartmentRepository departmentRepository;
 
     @GetMapping
     public String listPeriods(Model model) {
@@ -46,6 +47,7 @@ public class PeriodController {
             model.addAttribute("periodForm", new RegistrationPeriodDTO());
         }
         model.addAttribute("periodTypes", PeriodType.values());
+        model.addAttribute("departments", departmentRepository.findAll());
         return "admin/periods/create";
     }
 
@@ -58,6 +60,7 @@ public class PeriodController {
     ) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("periodTypes", PeriodType.values());
+            model.addAttribute("departments", departmentRepository.findAll());
             return "admin/periods/create";
         }
 
@@ -68,6 +71,7 @@ public class PeriodController {
         } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("periodTypes", PeriodType.values());
+            model.addAttribute("departments", departmentRepository.findAll());
             return "admin/periods/create";
         }
     }
@@ -86,10 +90,16 @@ public class PeriodController {
                 .reviewDeadline(period.getReviewDeadline())
                 .defenseDate(period.getDefenseDate())
                 .status(period.getStatus())
+                .minCredits(period.getMinCredits())
+                .minGpa(period.getMinGpa())
+                .targetDepartmentId(period.getTargetDepartment() != null ? period.getTargetDepartment().getId() : null)
+                .targetCohort(period.getTargetCohort())
+                .requiresAdvisorApproval(period.getRequiresAdvisorApproval())
                 .build();
 
         model.addAttribute("periodForm", dto);
         model.addAttribute("periodTypes", PeriodType.values());
+        model.addAttribute("departments", departmentRepository.findAll());
         model.addAttribute("allStatuses", PeriodStatus.values());
         return "admin/periods/edit";
     }
@@ -104,6 +114,7 @@ public class PeriodController {
     ) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("periodTypes", PeriodType.values());
+            model.addAttribute("departments", departmentRepository.findAll());
             model.addAttribute("allStatuses", PeriodStatus.values());
             return "admin/periods/edit";
         }

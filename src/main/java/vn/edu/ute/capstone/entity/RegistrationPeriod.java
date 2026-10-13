@@ -47,6 +47,25 @@ public class RegistrationPeriod {
     @Builder.Default
     private PeriodStatus status = PeriodStatus.DRAFT;
 
+    @Column(name = "min_credits")
+    @Builder.Default
+    private Integer minCredits = 0;
+
+    @Column(name = "min_gpa", precision = 3, scale = 2)
+    @Builder.Default
+    private java.math.BigDecimal minGpa = java.math.BigDecimal.ZERO;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_department_id")
+    private Department targetDepartment;
+
+    @Column(name = "target_cohort", length = 100)
+    private String targetCohort;
+
+    @Column(name = "requires_advisor_approval")
+    @Builder.Default
+    private Boolean requiresAdvisorApproval = false;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
