@@ -27,24 +27,28 @@
         </div>
     </div>
 
-    <!-- Filter by Registration Period -->
+    <!-- Filter by Registration Period & Live Search -->
     <div class="nb-card mb-4 p-3">
-        <form th:action="@{/department/catalog}" method="get" class="row g-2 align-items-center">
-            <div class="col-auto">
-                <label class="fw-bold small text-uppercase">Lọc theo đợt:</label>
-            </div>
+        <form th:action="@{/department/catalog}" method="get" class="row g-3 align-items-center">
             <div class="col-md-5">
-                <select name="periodId" class="nb-input py-1" onchange="this.form.submit()">
-                    <option value="">-- Tất cả các đợt đăng ký --</option>
-                    <option th:each="p : ${periods}" 
-                            th:value="${p.id}" 
-                            th:text="${p.name} + ' (' + ${p.periodType.displayName} + ' - ' + ${p.status.displayName} + ')'"
-                            th:selected="${selectedPeriodId != null && selectedPeriodId == p.id}">
-                    </option>
-                </select>
+                <label class="fw-bold small text-uppercase mb-1 d-block">Lọc theo đợt:</label>
+                <div class="d-flex gap-2">
+                    <select name="periodId" class="nb-input py-1 w-100" onchange="this.form.submit()">
+                        <option value="">-- Tất cả các đợt đăng ký --</option>
+                        <option th:each="p : ${periods}" 
+                                th:value="${p.id}" 
+                                th:text="${p.name} + ' (' + ${p.periodType.displayName} + ' - ' + ${p.status.displayName} + ')'"
+                                th:selected="${selectedPeriodId != null && selectedPeriodId == p.id}">
+                        </option>
+                    </select>
+                    <a th:if="${selectedPeriodId != null}" href="/department/catalog" class="nb-btn nb-btn-sm text-nowrap">XÓA LỌC</a>
+                </div>
             </div>
-            <div class="col-auto" th:if="${selectedPeriodId != null}">
-                <a href="/department/catalog" class="nb-btn nb-btn-sm">XÓA LỌC</a>
+            <div class="col-md-7">
+                <label class="fw-bold small text-uppercase mb-1 d-block">Tìm kiếm tức thì:</label>
+                <input type="text" id="liveSearchInput" class="nb-input py-1 w-100" 
+                       placeholder="Nhập mã đề tài, tên đề tài, giảng viên..." 
+                       oninput="filterTopicsTable(this.value)">
             </div>
         </form>
     </div>
@@ -139,6 +143,22 @@
     <div th:replace="~{fragments/layout :: pagination(${topicPage}, ${selectedPeriodId != null ? '/department/catalog?periodId=' + selectedPeriodId : '/department/catalog'})}"></div>
 
 </div>
+
+<script>
+    function filterTopicsTable(query) {
+        const term = (query || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.nb-table tbody tr');
+        rows.forEach(row => {
+            if (row.cells.length < 5) return;
+            const text = row.innerText.toLowerCase();
+            if (text.includes(term)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
 
 <div th:replace="~{fragments/layout :: footer}"></div>
 </body>

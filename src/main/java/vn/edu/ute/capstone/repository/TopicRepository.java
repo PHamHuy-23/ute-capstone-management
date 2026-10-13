@@ -50,5 +50,11 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     Page<Topic> findAll(Pageable pageable);
 
     Page<Topic> findByPeriodId(Long periodId, Pageable pageable);
+
+    @Query("SELECT d.name, COUNT(t) FROM Topic t JOIN t.department d GROUP BY d.id, d.name")
+    List<Object[]> countTopicsGroupByDepartment();
+
+    @Query("SELECT t.status, COUNT(t) FROM Topic t GROUP BY t.status")
+    List<Object[]> countTopicsGroupByStatus();
 }
 

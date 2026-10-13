@@ -57,6 +57,28 @@ public class AuthController {
             model.addAttribute("totalGroups", studentGroupRepository.count());
             model.addAttribute("totalPeriods", registrationPeriodRepository.count());
             model.addAttribute("totalUsers", userRepository.count());
+
+            // Dữ liệu biểu đồ trực quan (Neo-Brutalism Charts)
+            java.util.List<Object[]> deptStats = topicRepository.countTopicsGroupByDepartment();
+            java.util.List<String> deptLabels = new java.util.ArrayList<>();
+            java.util.List<Long> deptCounts = new java.util.ArrayList<>();
+            for (Object[] row : deptStats) {
+                deptLabels.add(row[0] != null ? row[0].toString() : "Khác");
+                deptCounts.add(((Number) row[1]).longValue());
+            }
+            model.addAttribute("deptChartLabels", deptLabels);
+            model.addAttribute("deptChartCounts", deptCounts);
+
+            java.util.List<Object[]> statusStats = topicRepository.countTopicsGroupByStatus();
+            java.util.List<String> statusLabels = new java.util.ArrayList<>();
+            java.util.List<Long> statusCounts = new java.util.ArrayList<>();
+            for (Object[] row : statusStats) {
+                vn.edu.ute.capstone.entity.TopicStatus st = (vn.edu.ute.capstone.entity.TopicStatus) row[0];
+                statusLabels.add(st != null ? st.getDescription() : "Khác");
+                statusCounts.add(((Number) row[1]).longValue());
+            }
+            model.addAttribute("statusChartLabels", statusLabels);
+            model.addAttribute("statusChartCounts", statusCounts);
         }
         return "dashboard";
     }

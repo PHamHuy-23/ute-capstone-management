@@ -57,6 +57,30 @@
             </div>
         </div>
 
+        <!-- Biểu Đồ Thống Kê Trực Quan (Neo-Brutalism Styled Charts) -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-7">
+                <div class="nb-card p-3 h-100">
+                    <h6 class="fw-bold text-uppercase border-bottom border-2 border-dark pb-2 mb-3">
+                        <i class="bi bi-bar-chart-line-fill me-2"></i>Phân Bổ Đề Tài Theo Bộ Môn
+                    </h6>
+                    <div style="height: 250px;">
+                        <canvas id="deptBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="nb-card p-3 h-100">
+                    <h6 class="fw-bold text-uppercase border-bottom border-2 border-dark pb-2 mb-3">
+                        <i class="bi bi-pie-chart-fill me-2"></i>Trạng Thái Duyệt Đề Tài
+                    </h6>
+                    <div style="height: 250px;">
+                        <canvas id="statusPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-3">
             <div class="col-md-3">
                 <div class="nb-card nb-card-hover h-100 d-flex flex-column justify-content-between">
@@ -275,29 +299,87 @@
 
 </div>
 
-<!-- Neo-Brutalism Top Loading Bar -->
-<div id="nbTopLoader"></div>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
-<script>
-    function showNbLoader() {
-        const bar = document.getElementById('nbTopLoader');
-        if (bar) {
-            bar.style.width = '40%';
-            bar.style.opacity = '1';
-            setTimeout(() => { bar.style.width = '80%'; }, 150);
-        }
-    }
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function () {
+        const deptLabels = /*[[${deptChartLabels}]]*/ [];
+        const deptCounts = /*[[${deptChartCounts}]]*/ [];
+        const statusLabels = /*[[${statusChartLabels}]]*/ [];
+        const statusCounts = /*[[${statusChartCounts}]]*/ [];
 
-    function hideNbLoader() {
-        const bar = document.getElementById('nbTopLoader');
-        if (bar) {
-            bar.style.width = '100%';
-            setTimeout(() => {
-                bar.style.opacity = '0';
-                setTimeout(() => { bar.style.width = '0%'; }, 250);
-            }, 200);
+        // 1. Bar Chart: Topics by Department (Neo-Brutalism Theme)
+        const deptCanvas = document.getElementById('deptBarChart');
+        if (deptCanvas && deptLabels && deptLabels.length > 0) {
+            new Chart(deptCanvas, {
+                type: 'bar',
+                data: {
+                    labels: deptLabels,
+                    datasets: [{
+                        label: 'Số lượng đề tài',
+                        data: deptCounts,
+                        backgroundColor: '#ffffff',
+                        borderColor: '#000000',
+                        borderWidth: 2,
+                        borderRadius: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#000000', font: { weight: 'bold' } },
+                            grid: { color: '#e0e0e0', drawBorder: true, borderColor: '#000' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, color: '#000000', font: { weight: 'bold' } },
+                            grid: { color: '#e0e0e0', drawBorder: true, borderColor: '#000' }
+                        }
+                    }
+                }
+            });
         }
-    }
+
+        // 2. Pie / Doughnut Chart: Topics by Status (High Contrast Neo-Brutalism)
+        const statusCanvas = document.getElementById('statusPieChart');
+        if (statusCanvas && statusLabels && statusLabels.length > 0) {
+            new Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusCounts,
+                        backgroundColor: ['#000000', '#ffffff', '#e0e0e0', '#666666', '#a0a0a0'],
+                        borderColor: '#000000',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#000000',
+                                font: { weight: 'bold' },
+                                boxWidth: 15,
+                                padding: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+    /*]]>*/
 </script>
 
 <div th:replace="~{fragments/layout :: footer}"></div>

@@ -49,20 +49,26 @@
         </div>
     </div>
 
-    <!-- Filter by Registration Period -->
+    <!-- Filter & Live Search by Registration Period / Keyword -->
     <div class="nb-card mb-4 p-3">
-        <form th:action="@{/student/topics}" method="get" class="row g-2 align-items-center">
-            <div class="col-auto">
-                <label class="fw-bold small text-uppercase">Đợt đăng ký:</label>
-            </div>
+        <form th:action="@{/student/topics}" method="get" class="row g-3 align-items-center">
             <div class="col-md-5">
-                <select name="periodId" class="nb-input py-1" onchange="this.form.submit()">
+                <label class="fw-bold small text-uppercase mb-1 d-block">Đợt đăng ký:</label>
+                <select name="periodId" class="nb-input py-1 w-100" onchange="this.form.submit()">
                     <option th:each="p : ${periods}" 
                             th:value="${p.id}" 
                             th:text="${p.name} + ' (' + ${p.periodType.displayName} + ' - ' + ${p.status.displayName} + ')'"
                             th:selected="${selectedPeriodId != null && selectedPeriodId == p.id}">
                     </option>
                 </select>
+            </div>
+            <div class="col-md-7">
+                <label class="fw-bold small text-uppercase mb-1 d-block">Tìm kiếm tức thì:</label>
+                <div class="position-relative">
+                    <input type="text" id="liveSearchInput" class="nb-input py-1 w-100" 
+                           placeholder="Nhập mã đề tài, tên đề tài, giảng viên hoặc bộ môn..." 
+                           oninput="filterTopicsTable(this.value)">
+                </div>
             </div>
         </form>
     </div>
@@ -170,6 +176,20 @@
         if (confirmed) {
             document.getElementById('registerTopicForm_' + topicId).submit();
         }
+    }
+
+    function filterTopicsTable(query) {
+        const term = (query || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.nb-table tbody tr');
+        rows.forEach(row => {
+            if (row.cells.length < 5) return; // Skip empty message row
+            const text = row.innerText.toLowerCase();
+            if (text.includes(term)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     }
 </script>
 
