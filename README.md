@@ -172,12 +172,14 @@ mvn spring-boot:run
 Ứng dụng sẽ tự động chạy Flyway migrate và khởi động tại: `http://localhost:8080`
 
 ### 5. Tài khoản dùng thử mặc định (Seed Data)
-| Tên đăng nhập | Mật khẩu | Phân quyền | Vai trò |
-| :--- | :--- | :--- | :--- |
-| `admin` | `123456` | `ROLE_ADMIN` | Trưởng Khoa / Quản trị hệ thống |
-| `truongbomon_cnpm` | `123456` | `ROLE_DEPARTMENT_HEAD` | Trưởng Bộ môn Công nghệ Phần mềm |
-| `gv001` | `123456` | `ROLE_LECTURER` | Giảng viên Khoa CNTT |
-| `sv001` | `123456` | `ROLE_STUDENT` | Sinh viên làm đồ án |
+| Tên đăng nhập | Mật khẩu | Phân quyền | Vai trò | Họ và tên |
+| :--- | :--- | :--- | :--- | :--- |
+| `truongkhoa` | `123456` | `ROLE_ADMIN` | Trưởng Khoa / Quản trị hệ thống | PGS.TS Nguyễn Văn Trưởng Khoa |
+| `head_cnpm` | `123456` | `ROLE_DEPARTMENT_HEAD` | Trưởng Bộ môn CNPM | TS. Trần Văn Trưởng Bộ Môn |
+| `gv_minh` | `123456` | `ROLE_LECTURER` | Giảng viên hướng dẫn | ThS. Lê Quang Minh |
+| `gv_nam` | `123456` | `ROLE_LECTURER` | Giảng viên phản biện / HĐ | TS. Hoàng Nam |
+| `sv_nghia` | `123456` | `ROLE_STUDENT` | Sinh viên (Nhóm trưởng) | Đặng Đại Nghĩa |
+| `sv_anh` | `123456` | `ROLE_STUDENT` | Sinh viên (Thành viên) | Nguyễn Tuấn Anh |
 
 ---
 

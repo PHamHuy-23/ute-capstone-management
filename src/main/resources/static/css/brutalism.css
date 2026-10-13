@@ -2,16 +2,29 @@
    HCMUTE CAPSTONE - NEO-BRUTALISM DESIGN SYSTEM (CORE TOKENS & UTILITIES)
    ========================================================================== */
 
+/* 0. GOOGLE FONTS IMPORT (Plus Jakarta Sans & Space Grotesk) */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap');
+
 /* 1. DESIGN TOKENS (Biến dùng chung) */
 :root {
-    /* Palette: Tuyệt đối Đen & Trắng */
-    --color-bg: #ffffff;
+    /* Palette: Tuyệt đối Đen & Trắng & Điểm nhấn tinh tế */
+    --color-bg: #fcfcfc;
     --color-surface: #ffffff;
-    --color-surface-hover: #f5f5f5;
-    --color-text: #000000;
-    --color-text-muted: #555555;
+    --color-surface-hover: #f4f4f4;
+    --color-text: #050505;
+    --color-text-muted: #525252;
     --color-text-inverted: #ffffff;
-    --color-border: #000000;
+    --color-border: #050505;
+
+    /* Semantic Accent Badges (Neo-Brutalism High Contrast) */
+    --color-accent-blue: #e0f2fe;
+    --color-accent-blue-border: #0284c7;
+    --color-accent-green: #dcfce7;
+    --color-accent-green-border: #16a34a;
+    --color-accent-amber: #fef3c7;
+    --color-accent-amber-border: #d97706;
+    --color-accent-red: #fee2e2;
+    --color-accent-red-border: #dc2626;
 
     /* Borders */
     --border-width-sm: 1.5px;
@@ -22,39 +35,44 @@
     --border-solid-sm: var(--border-width-sm) solid var(--color-border);
     --radius-none: 0px;
 
-    /* Hard Shadows: Chỉ dùng cho khối nền TRẮNG */
+    /* Hard Shadows */
     --shadow-sm: 2px 2px 0px var(--color-border);
     --shadow-md: 4px 4px 0px var(--color-border);
     --shadow-lg: 6px 6px 0px var(--color-border);
     --shadow-pressed: 1px 1px 0px var(--color-border);
 
     /* Click-down translation */
-    --press-offset: translate(3px, 3px);
+    --press-offset: translate(2.5px, 2.5px);
     --press-offset-sm: translate(1.5px, 1.5px);
 }
 
 /* 2. BASE RESET */
 body {
     background-color: var(--color-bg) !important;
+    background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
     color: var(--color-text) !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
 }
 
 /* 3. NAVIGATION (nb-navbar) */
 .nb-navbar {
     background-color: var(--color-surface);
     border-bottom: var(--border-solid-thick);
-    padding: 12px 0;
+    padding: 14px 0;
+    box-shadow: 0 2px 0 var(--color-border);
 }
 
 .nb-navbar .navbar-brand {
     color: var(--color-text) !important;
-    font-weight: 900;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
     letter-spacing: -0.5px;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
 }
 
 /* 4. CARDS & PANELS (nb-card) */
@@ -65,7 +83,12 @@ body {
     border-radius: var(--radius-none) !important;
     padding: 24px;
     margin-bottom: 24px;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nb-card-hover:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .nb-card-flat {
@@ -255,17 +278,21 @@ body {
     background-color: var(--color-surface-hover);
 }
 
-/* 8. BADGES (nb-badge) - Không shadow gây bẩn */
+/* 8. BADGES (nb-badge) - Neo-Brutalism High Contrast Tags */
 .nb-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     padding: 3px 8px;
     font-size: 0.75rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
     border: var(--border-solid-sm);
     border-radius: var(--radius-none);
     background-color: var(--color-surface);
     color: var(--color-text);
-    box-shadow: none !important;
+    box-shadow: 1px 1px 0px var(--color-border);
 }
 
 .nb-badge-black {
@@ -275,29 +302,62 @@ body {
     box-shadow: none !important;
 }
 
+.nb-badge-success {
+    background-color: var(--color-accent-green) !important;
+    color: #14532d !important;
+    border-color: var(--color-border) !important;
+}
+
+.nb-badge-warning {
+    background-color: var(--color-accent-amber) !important;
+    color: #78350f !important;
+    border-color: var(--color-border) !important;
+}
+
+.nb-badge-danger {
+    background-color: var(--color-accent-red) !important;
+    color: #7f1d1d !important;
+    border-color: var(--color-border) !important;
+}
+
+.nb-badge-info {
+    background-color: var(--color-accent-blue) !important;
+    color: #0c4a6e !important;
+    border-color: var(--color-border) !important;
+}
+
 /* 9. ALERTS (nb-alert) */
 .nb-alert {
     border: var(--border-solid);
     border-radius: var(--radius-none);
     box-shadow: var(--shadow-sm);
-    padding: 12px 18px;
+    padding: 14px 20px;
     background-color: var(--color-surface);
     color: var(--color-text);
     margin-bottom: 20px;
     font-weight: 600;
+    line-height: 1.5;
 }
 
 .nb-alert-danger {
-    border-left: 8px solid var(--color-border);
+    border-left: 8px solid #dc2626;
+    background-color: #fffaf0;
+}
+
+.nb-alert-warning {
+    border-left: 8px solid #d97706;
+    background-color: #fffdf5;
 }
 
 .nb-alert-success {
-    border-left: 8px solid var(--color-border);
+    border-left: 8px solid #16a34a;
+    background-color: #f7fee7;
 }
 
 /* 10. TYPOGRAPHY & UTILITIES */
 .nb-title {
-    font-weight: 900;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: -0.5px;
 }
