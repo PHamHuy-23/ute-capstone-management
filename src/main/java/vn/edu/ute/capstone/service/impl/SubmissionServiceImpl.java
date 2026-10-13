@@ -40,6 +40,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private final SubmissionRepository submissionRepository;
     private final StudentGroupRepository groupRepository;
+    private final vn.edu.ute.capstone.repository.CouncilRepository councilRepository;
     private final S3Client s3Client;
     private final CloudflareR2Config r2Config;
 
@@ -212,7 +213,8 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         // Thành viên trong Hội đồng chấm đề tài này (được phép xem đồ án để chấm điểm)
         if (group.getTopic() != null) {
-            boolean isCouncilMember = group.getTopic().getCouncils().stream()
+            List<vn.edu.ute.capstone.entity.Council> councils = councilRepository.findByTopicId(group.getTopic().getId());
+            boolean isCouncilMember = councils.stream()
                     .anyMatch(c -> c.getMembers().stream()
                             .anyMatch(m -> m.getLecturer().getId().equals(currentUser.getId())));
             if (isCouncilMember) return;

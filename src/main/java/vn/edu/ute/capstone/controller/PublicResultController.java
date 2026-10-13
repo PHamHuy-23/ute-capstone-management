@@ -48,6 +48,7 @@ public class PublicResultController {
                 .body(new InputStreamResource(in));
     }
 
+    private final vn.edu.ute.capstone.service.StudentGroupService studentGroupService;
     private final vn.edu.ute.capstone.service.UserService userService;
 
     @GetMapping({"/admin/publish", "/student/results"})
@@ -63,7 +64,7 @@ public class PublicResultController {
         List<Topic> topics;
         if (isStudent && userDetails != null) {
             vn.edu.ute.capstone.entity.User student = userService.findByUsername(userDetails.getUsername());
-            List<vn.edu.ute.capstone.entity.StudentGroup> myGroups = groupRepository.findByStudentId(student.getId());
+            List<vn.edu.ute.capstone.entity.StudentGroup> myGroups = studentGroupService.getGroupsByStudent(student.getId());
             topics = myGroups.stream()
                     .map(vn.edu.ute.capstone.entity.StudentGroup::getTopic)
                     .filter(java.util.Objects::nonNull)

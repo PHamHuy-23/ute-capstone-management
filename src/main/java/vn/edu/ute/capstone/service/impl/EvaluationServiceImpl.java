@@ -137,7 +137,7 @@ public class EvaluationServiceImpl implements EvaluationService {
             throw new IllegalArgumentException("Chủ tịch hội đồng và Thư ký hội đồng không được là cùng một người.");
         }
 
-        RegistrationPeriod period = registrationPeriodRepository.findById(dto.getPeriodId())
+        RegistrationPeriod period = periodRepository.findById(dto.getPeriodId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đợt đăng ký."));
 
         council.setName(dto.getName());
