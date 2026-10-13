@@ -46,6 +46,12 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <!-- Spring Mail (Hệ thống gửi Email thông báo tự động) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- 3. Apache POI (Xử lý Excel Import / Export) -->
         <dependency>
             <groupId>org.apache.poi</groupId>

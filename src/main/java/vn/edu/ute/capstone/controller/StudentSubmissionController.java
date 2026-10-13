@@ -36,6 +36,7 @@ public class StudentSubmissionController {
     private final StudentGroupService groupService;
     private final UserService userService;
     private final RegistrationPeriodRepository periodRepository;
+    private final vn.edu.ute.capstone.service.EmailNotificationService emailNotificationService;
 
     @GetMapping
     public String viewSubmissions(
@@ -96,8 +97,20 @@ public class StudentSubmissionController {
         User student = userService.findByUsername(userDetails.getUsername());
 
         try {
-            submissionService.submitReport(submissionForm, reportFile, student);
-            redirectAttributes.addFlashAttribute("successMessage", "Nộp báo cáo thành công!");
+            Submission submission = submissionService.submitReport(submissionForm, reportFile, student);
+            
+            // Gửi email thông báo tự động cho Giảng viên hướng dẫn
+            if (submission.getGroup() != null && submission.getGroup().getTopic() != null) {
+                Topic topic = submission.getGroup().getTopic();
+                topic.getAdvisors().forEach(adv -> emailNotificationService.notifyNewSubmission(
+                        adv.getLecturer().getEmail(),
+                        submission.getGroup().getGroupCode(),
+                        topic.getTitle(),
+                        submission.getTitle()
+                ));
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage", "Nộp báo cáo thành công! Đã gửi thông báo đến GVHD.");
         } catch (Exception e) {
             log.error("Lỗi khi nộp báo cáo: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

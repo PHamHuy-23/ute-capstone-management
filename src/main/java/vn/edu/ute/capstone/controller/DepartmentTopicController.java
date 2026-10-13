@@ -32,6 +32,7 @@ public class DepartmentTopicController {
     private final UserService userService;
     private final RegistrationPeriodRepository periodRepository;
     private final DepartmentRepository departmentRepository;
+    private final vn.edu.ute.capstone.service.EmailNotificationService emailNotificationService;
 
     @GetMapping("/topics")
     public String listTopicsForDepartment(
@@ -73,10 +74,23 @@ public class DepartmentTopicController {
 
         try {
             Topic topic = topicService.approveOrRejectTopic(approvalForm, currentUser);
-            if (Boolean.TRUE.equals(approvalForm.getApproved())) {
+            boolean approved = Boolean.TRUE.equals(approvalForm.getApproved());
+            
+            // Gửi email thông báo tự động đến GVHD chính
+            topic.getAdvisors().stream()
+                    .filter(vn.edu.ute.capstone.entity.TopicAdvisor::getIsPrimary)
+                    .findFirst()
+                    .ifPresent(adv -> emailNotificationService.notifyTopicStatusChange(
+                            adv.getLecturer().getEmail(),
+                            topic.getTitle(),
+                            approved,
+                            approvalForm.getRejectionReason()
+                    ));
+
+            if (approved) {
                 redirectAttributes.addFlashAttribute("successMessage", "Đã phê duyệt đề tài '" + topic.getTitle() + "' thành công!");
             } else {
-                redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối đề tài '" + topic.getTitle() + "'. Đã gửi phản hồi lý do cho GV.");
+                redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối đề tài '" + topic.getTitle() + "'. Đã gửi email phản hồi lý do cho GV.");
             }
         } catch (Exception e) {
             log.error("Lỗi khi xét duyệt đề tài: ", e);
